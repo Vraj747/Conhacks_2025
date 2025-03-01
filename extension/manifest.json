@@ -1,0 +1,57 @@
+{
+	"name": "Do I Need That?",
+	"version": "1.0.1",
+	"description": "Promotes sustainable shopping by suggesting second-hand alternatives and eco-friendly products",
+	"manifest_version": 3,
+	"permissions": ["activeTab", "storage", "scripting", "tabs"],
+	"action": {
+	  "default_popup": "popup.html",
+	  "default_icon": {
+		"16": "images/icon16.png",
+		"48": "images/icon48.png",
+		"128": "images/icon128.png"
+	  }
+	},
+	"icons": {
+	  "16": "images/icon16.png",
+	  "48": "images/icon48.png",
+	  "128": "images/icon128.png"
+	},
+	"content_scripts": [
+	  {
+		"matches": [
+		  "*://*.amazon.com/*", 
+		  "*://*.amazon.ca/*", 
+		  "*://*.walmart.com/*",
+		  "*://*.walmart.ca/*",
+		  "*://*.target.com/*", 
+		  "*://*.bestbuy.com/*",
+		  "*://*.bestbuy.ca/*",
+		  "*://*.staples.ca/*",
+		  "*://*.ebay.com/*"
+		],
+		"js": ["contentScript.js"],
+		"css": ["styles.css"],
+		"run_at": "document_start"
+	  }
+	],
+	"background": {
+	  "service_worker": "background.js"
+	},
+	"host_permissions": [
+	  "*://*.amazon.com/*",
+	  "*://*.amazon.ca/*",
+	  "*://*.walmart.com/*",
+	  "*://*.walmart.ca/*",
+	  "*://*.bestbuy.com/*",
+	  "*://*.bestbuy.ca/*",
+	  "*://*.staples.ca/*",
+	  "*://*.facebook.com/marketplace/*",
+	  "*://*.kijiji.ca/*",
+	  "*://*.ebay.com/*",
+	  "*://*.craigslist.org/*",
+	  "*://*.goodonyou.eco/*",
+	  "*://*.ethicalconsumer.org/*",
+	  "http://127.0.0.1:5000/*"
+	]
+}
