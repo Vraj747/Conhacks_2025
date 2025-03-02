@@ -1,93 +1,105 @@
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 
 def scrape_product_data(url):
-    # Set up Selenium WebDriver with headless mode
+    """
+    Scrape product data from the provided URL
+    """
+    # Configure Chrome options
     options = Options()
-    options.add_argument("--headless")  # Run in the background
-    options.add_argument("--disable-gpu")
+    options.add_argument("--headless")  # Run in headless mode (no browser UI)
     options.add_argument("--no-sandbox")
-    options.add_argument("--window-size=1920,1080")
-    options.add_argument("--disable-infobars")
     options.add_argument("--disable-dev-shm-usage")
-
-    # Install and start Chrome WebDriver
-    service = Service(ChromeDriverManager().install())
-    driver = webdriver.Chrome(service=service, options=options)
-
+    
+    # Fix for Mac M1/M2 chips (Apple Silicon)
+    options.add_argument("--disable-gpu")
+    
     try:
+        # Use ChromeDriverManager with explicit version for Mac ARM architecture
+        service = Service(ChromeDriverManager().install())
+        driver = webdriver.Chrome(service=service, options=options)
+        
+        # Navigate to the URL
         driver.get(url)
-        wait = WebDriverWait(driver, 5)  # Wait up to 5 seconds for elements
-
-        # Extract Title
+        
+        # Wait for the page to load
+        wait = WebDriverWait(driver, 10)
+        
+        # Extract product information
         try:
-            title = wait.until(EC.presence_of_element_located((By.ID, "productTitle"))).text.strip()
+            product_title = wait.until(EC.presence_of_element_located((By.ID, "productTitle"))).text
         except:
-            title = None
-
-        # Extract Price
+            product_title = "Title not found"
+        
         try:
-            price = driver.find_element(By.CSS_SELECTOR, "span.a-price-whole").text.strip()
+            price_element = driver.find_element(By.CSS_SELECTOR, ".a-price .a-offscreen")
+            price = price_element.get_attribute("textContent")
         except:
-            price = None
-
-        # Extract Image URL
+            try:
+                price_element = driver.find_element(By.CSS_SELECTOR, "#priceblock_ourprice")
+                price = price_element.text
+            except:
+                price = "Price not found"
+        
         try:
-            image_url = driver.find_element(By.ID, "landingImage").get_attribute("src")
+            rating_element = driver.find_element(By.CSS_SELECTOR, "span.a-icon-alt")
+            rating = rating_element.get_attribute("textContent")
         except:
-            image_url = None
-
-        # Extract Ratings
+            rating = "Rating not found"
+        
         try:
-            rating = driver.find_element(By.CLASS_NAME, "a-icon-alt").text.strip()
+            reviews_count_element = driver.find_element(By.ID, "acrCustomerReviewText")
+            reviews_count = reviews_count_element.text
         except:
-            rating = None
-
-        # Extract Number of Reviews
+            reviews_count = "Review count not found"
+        
+        # Get product details
+        product_details = {}
         try:
-            reviews = driver.find_element(By.ID, "acrCustomerReviewText").text.strip()
+            details_table = driver.find_element(By.ID, "productDetails_detailBullets_sections1")
+            rows = details_table.find_elements(By.TAG_NAME, "tr")
+            for row in rows:
+                try:
+                    key = row.find_element(By.TAG_NAME, "th").text.strip()
+                    value = row.find_element(By.TAG_NAME, "td").text.strip()
+                    product_details[key] = value
+                except:
+                    continue
         except:
-            reviews = None
-
-        # Extract Availability
+            product_details = {"details": "Details not found"}
+        
+        # Get product description
         try:
-            availability = driver.find_element(By.ID, "availability").text.strip()
+            description_element = driver.find_element(By.ID, "productDescription")
+            description = description_element.text
         except:
-            availability = None
-
-        # Extract Brand Name
-        try:
-            brand = driver.find_element(By.ID, "bylineInfo").text.strip()
-        except:
-            brand = None
-
-        # Extract Product Description
-        try:
-            description = driver.find_element(By.ID, "feature-bullets").text.strip()
-        except:
-            description = None
-
-        driver.quit()
-
-        if not title or not price:
-            return {"error": "Failed to extract product details"}
-
-        return {
-            "title": title,
+            description = "Description not found"
+        
+        # Combine data
+        product_data = {
+            "title": product_title,
             "price": price,
-            "image_url": image_url,
             "rating": rating,
-            "reviews": reviews,
-            "availability": availability,
-            "brand": brand,
-            "description": description
+            "reviews_count": reviews_count,
+            "details": product_details,
+            "description": description,
+            "url": url
         }
-
+        
+        return product_data
+    
     except Exception as e:
-        driver.quit()
+        print(f"Error: {str(e)}")
         return {"error": str(e)}
+    
+    finally:
+        # Always close the driver
+        try:
+            driver.quit()
+        except:
+            pass
