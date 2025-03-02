@@ -1,0 +1,31 @@
+# conhacks2025
+# sustainable-shopping-assistant
+# MindSetGo - Name of Application
+
+Read below for instructions:
+
+For Python you will need to install:
+
+fastapi
+uvicorn
+requests
+beautifulsoup4
+scrapy
+pymongo
+python-dotenv
+
+Run this in the /backend folder:
+
+python -m venv venv  # Create virtual environment
+source venv/bin/activate  # Mac/Linux
+venv\Scripts\activate  # Windows
+pip install -r requirements.txt  # Install dependencies
+
+How to Run Everything:
+npm install # installs frontend dependencies
+pip install -r backend/requirements.txt
+
+
+
+
+
