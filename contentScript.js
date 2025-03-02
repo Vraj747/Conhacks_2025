@@ -118,8 +118,11 @@ function displayProductInfo(data) {
     const contentElement = document.getElementById('dineed-content');
     contentElement.style.display = 'block';
     
-    // Get sustainability score
-    const scoreValue = data.product.sustainability_score;
+    // Get sustainability score from eco_factors array
+    const ecoFactors = data.eco_factors || [0, []];
+    const scoreValue = ecoFactors[0] || 0;
+    const factors = ecoFactors[1] || [];
+    
     const scoreLevel = scoreValue >= 75 ? 'high' : (scoreValue >= 50 ? 'medium' : 'low');
     const scoreColor = scoreValue >= 75 ? '#4CAF50' : (scoreValue >= 50 ? '#FF9800' : '#F44336');
     const impactText = scoreLevel === 'high' ? 'Low Impact' : (scoreLevel === 'medium' ? 'Medium Impact' : 'High Impact');
@@ -135,10 +138,10 @@ function displayProductInfo(data) {
     `;
     
     // Add eco factors
-    if (data.product.eco_factors && data.product.eco_factors.length > 0) {
+    if (factors && factors.length > 0) {
         html += '<div style="margin-bottom: 15px;"><h4 style="margin: 5px 0;">Environmental Factors:</h4><ul style="margin: 5px 0; padding-left: 20px;">';
         
-        data.product.eco_factors.forEach(factor => {
+        factors.forEach(factor => {
             html += `<li>${factor}</li>`;
         });
         

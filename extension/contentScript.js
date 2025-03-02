@@ -233,7 +233,47 @@ function showSavedMessage() {
 // Add this to contentScript.js
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
   if (request.action === "showAlternatives") {
-    displayAlternatives(request.secondHand, request.sustainable, request.originalProduct);
+    displayAlternatives(request.secondHand, null, request.originalProduct);
+  } else if (request.action === "showLoading") {
+    // Show loading overlay with custom message
+    const loadingOverlay = document.createElement('div');
+    loadingOverlay.className = 'dineed-overlay';
+    loadingOverlay.innerHTML = `
+      <div class="dineed-popup dineed-loading">
+        <h2>${request.message || 'Finding second-hand alternatives...'}</h2>
+        <div class="dineed-spinner"></div>
+        <p>We're searching for second-hand items on trusted marketplaces</p>
+      </div>
+    `;
+    
+    // Remove any existing overlays first
+    removePopup();
+    document.body.appendChild(loadingOverlay);
+  } else if (request.action === "showError") {
+    // Show error message
+    const errorOverlay = document.createElement('div');
+    errorOverlay.className = 'dineed-overlay';
+    errorOverlay.innerHTML = `
+      <div class="dineed-popup dineed-error">
+        <h2>Oops! Something went wrong</h2>
+        <p>${request.message || 'Could not find alternatives at this time.'}</p>
+        <div class="dineed-buttons">
+          <button id="dineed-error-close">Close</button>
+          <button id="dineed-error-retry">Try Again</button>
+        </div>
+      </div>
+    `;
+    
+    // Remove any existing overlays first
+    removePopup();
+    document.body.appendChild(errorOverlay);
+    
+    // Add event listeners for buttons
+    document.getElementById('dineed-error-close').addEventListener('click', removePopup);
+    document.getElementById('dineed-error-retry').addEventListener('click', function() {
+      removePopup();
+      findAlternatives();
+    });
   }
 });
 
@@ -246,63 +286,77 @@ function displayAlternatives(secondHand, sustainable, originalProduct) {
   alternativesOverlay.className = 'dineed-overlay';
   
   let secondHandHTML = '';
-  secondHand.forEach(item => {
-    // Check if the URL is specific to a product or just a generic marketplace URL
-    const isSpecificUrl = item.url.includes('item') || item.url.includes('listing') || item.url.includes('itm');
-    const buttonText = isSpecificUrl ? 'View Item' : 'Visit Marketplace';
-    const buttonTitle = isSpecificUrl ? 
-      'View this specific second-hand item' : 
-      'This will take you to the marketplace where you can search for similar items';
-    
-    secondHandHTML += `
-      <div class="dineed-alternative-item">
-        <h4>${item.title}</h4>
-        <div class="dineed-alt-details">
-          <span class="dineed-price">${item.price}</span>
-          <span class="dineed-source" title="Verified second-hand marketplace">${item.source} ✓</span>
-          <span class="dineed-distance">${item.distance}</span>
-          ${item.condition ? `<span class="dineed-condition">Condition: ${item.condition}</span>` : ''}
+  if (secondHand && secondHand.length > 0) {
+    secondHand.forEach(item => {
+      // Check if the URL is specific to a product or just a search/marketplace URL
+      const isSpecificUrl = item.url && (
+        item.url.includes('/itm/') || 
+        item.url.includes('/listing/') || 
+        item.url.includes('/dp/') || 
+        item.url.includes('/item/')
+      );
+      
+      // Check if it's a search URL
+      const isSearchUrl = item.url && (
+        item.url.includes('/sch/') || 
+        item.url.includes('/search') || 
+        item.url.includes('?q=') || 
+        item.url.includes('?keyword=') || 
+        item.url.includes('?query=')
+      );
+      
+      let buttonText = 'View Item';
+      let buttonTitle = 'View this specific second-hand item';
+      
+      if (isSearchUrl || item.isSearchUrl) {
+        buttonText = 'View Similar Items';
+        buttonTitle = 'This will take you to search results for similar items on this marketplace';
+      } else if (!isSpecificUrl) {
+        buttonText = 'Visit Marketplace';
+        buttonTitle = 'This will take you to the marketplace homepage';
+      }
+      
+      // Ensure we have all required properties with defaults
+      const title = item.title || 'Unknown Product';
+      const price = item.price || 'Price not available';
+      const source = item.source || 'Unknown Source';
+      const url = item.url || '#';
+      const condition = item.condition || 'Used';
+      const distance = item.distance || 'Ships nationwide';
+      
+      secondHandHTML += `
+        <div class="dineed-alternative-item">
+          <h4>${title}</h4>
+          <div class="dineed-alt-details">
+            <span class="dineed-price">${price}</span>
+            <span class="dineed-source" title="Verified second-hand marketplace">${source} ✓</span>
+            <span class="dineed-distance">${distance}</span>
+            <span class="dineed-condition">Condition: ${condition}</span>
+          </div>
+          <div class="dineed-credibility">
+            <span class="dineed-credibility-badge" title="This source has buyer protection and verified sellers">Credible Source</span>
+            ${isSearchUrl || item.isSearchUrl ? '<span class="dineed-search-badge" title="This link will show you search results for similar items">Search Results</span>' : ''}
+          </div>
+          <a href="${url}" target="_blank" class="dineed-view-btn" title="${buttonTitle}">${buttonText}</a>
         </div>
-        <div class="dineed-credibility">
-          <span class="dineed-credibility-badge" title="This source has buyer protection and verified sellers">Credible Source</span>
-        </div>
-        <a href="${item.url}" target="_blank" class="dineed-view-btn" title="${buttonTitle}">${buttonText}</a>
-      </div>
-    `;
-  });
+      `;
+    });
+  }
   
-  let sustainableHTML = '';
-  sustainable.forEach(item => {
-    // Check if the URL is specific to a product or just a generic brand URL
-    const isSpecificUrl = item.url.includes('product') || item.url.includes('products');
-    const buttonText = isSpecificUrl ? 'View Item' : 'Visit Brand';
-    const buttonTitle = isSpecificUrl ? 
-      'View this specific sustainable product' : 
-      'This will take you to the brand\'s website where you can browse similar sustainable products';
-    
-    sustainableHTML += `
-      <div class="dineed-alternative-item">
-        <h4>${item.title}</h4>
-        <div class="dineed-alt-details">
-          <span class="dineed-price">${item.price}</span>
-          <span class="dineed-source" title="Verified sustainable brand">${item.source} ✓</span>
-          <span class="dineed-eco">Rating: ${item.ecoRating}</span>
-        </div>
-        <a href="${item.url}" target="_blank" class="dineed-view-btn" title="${buttonTitle}">${buttonText}</a>
-      </div>
-    `;
-  });
+  // Ensure we have the original product info with defaults
+  const originalTitle = originalProduct && originalProduct.title ? originalProduct.title : 'Unknown Product';
+  const originalPrice = originalProduct && originalProduct.price ? originalProduct.price : 'Price not available';
   
   alternativesOverlay.innerHTML = `
     <div class="dineed-alternatives-popup">
       <div class="dineed-alt-header">
-        <h2>Sustainable Alternatives</h2>
+        <h2>Second-Hand Alternatives</h2>
         <button class="dineed-close">&times;</button>
       </div>
       
       <div class="dineed-original">
         <h3>Original Item:</h3>
-        <p>${originalProduct.title} - ${originalProduct.price}</p>
+        <p>${originalTitle} - ${originalPrice}</p>
       </div>
       
       <div class="dineed-alt-section">
@@ -311,12 +365,8 @@ function displayAlternatives(secondHand, sustainable, originalProduct) {
         <div class="dineed-alt-container">
           ${secondHandHTML.length ? secondHandHTML : '<p>No second-hand options found from credible sources</p>'}
         </div>
-      </div>
-      
-      <div class="dineed-alt-section">
-        <h3>Sustainable Brand Alternatives</h3>
-        <div class="dineed-alt-container">
-          ${sustainableHTML.length ? sustainableHTML : '<p>No sustainable alternatives found</p>'}
+        <div class="dineed-search-explanation">
+          <p><strong>Note:</strong> Links will take you to search results for similar items on these marketplaces. From there, you can browse and filter to find the exact item you're looking for.</p>
         </div>
       </div>
       

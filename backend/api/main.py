@@ -24,7 +24,6 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 from backend.scraper.product_scraper import scrape_product_data
 from backend.scraper.secondhand_scraper import find_secondhand_alternatives
-from backend.scraper.sustainable_scraper import find_sustainable_alternatives
 
 app = Flask(__name__)
 # Enable CORS for all routes
@@ -133,82 +132,49 @@ def calculate_sustainability_metric(product_data):
 
 @app.route('/api/analyze', methods=['POST'])
 def analyze_product():
-    """
-    Analyze a product URL and return sustainability metrics and alternatives.
-    """
-    start_time = time.time()
-    logger.info("Received product analysis request")
-    
     try:
-        # Get URL from request
-        data = request.json
-        url = data.get('url')
+        data = request.get_json()
         
-        if not url:
-            logger.error("No URL provided in request")
-            return jsonify({
-                "error": "No URL provided",
-                "success": False
-            }), 400
+        if not data or 'url' not in data:
+            return jsonify({"error": "Missing URL parameter"}), 400
+            
+        url = data['url']
         
-        logger.info(f"Analyzing product URL: {url}")
+        # Log the request
+        app.logger.info(f"Analyzing product URL: {url}")
         
-        # Scrape product data
-        logger.info("Starting product data scraping")
-        product_data = scrape_product_data(url)
+        start_time = time.time()
         
-        # Check if scraping was successful
-        if "error" in product_data:
-            logger.error(f"Error scraping product data: {product_data['error']}")
-            return jsonify({
-                "error": f"Could not analyze this product: {product_data['error']}",
-                "success": False
-            }), 500
+        # Extract product information
+        product_info = scrape_product_data(url)
         
-        logger.info(f"Successfully scraped product data for: {product_data.get('title', 'Unknown Product')}")
-        
-        # Calculate sustainability metrics
-        logger.info("Calculating sustainability metrics")
-        sustainability_score, eco_factors = calculate_sustainability_metric(product_data)
-        
+        if not product_info:
+            return jsonify({"error": "Could not extract product information"}), 400
+            
         # Find second-hand alternatives
-        logger.info("Finding second-hand alternatives")
-        secondhand_alternatives = find_secondhand_alternatives(product_data)
+        product_name = product_info.get('title', '')
+        if not product_name:
+            return jsonify({"error": "Could not extract product name"}), 400
+            
+        secondhand_alternatives = find_secondhand_alternatives(product_name, max_results=6)
         
-        # Find sustainable alternatives
-        logger.info("Finding sustainable alternatives")
-        sustainable_alternatives = find_sustainable_alternatives(product_data)
+        # Calculate eco-factors
+        eco_factors = calculate_sustainability_metric(product_info)
         
-        # Prepare response
-        response = {
-            "success": True,
-            "product": {
-                "title": product_data.get('title', 'Unknown Product'),
-                "price": product_data.get('price', '$0.00'),
-                "image_url": product_data.get('image_url', ''),
-                "url": url,
-                "sustainability_score": sustainability_score,
-                "eco_factors": eco_factors
-            },
-            "secondhand_alternatives": secondhand_alternatives,
-            "sustainable_alternatives": sustainable_alternatives,
-            "processing_time": f"{time.time() - start_time:.2f} seconds"
-        }
+        # Add alternatives and eco-factors to the response
+        product_info['secondhand_alternatives'] = secondhand_alternatives
+        product_info['eco_factors'] = eco_factors
         
-        # Log successful analysis
-        logger.info(f"Successfully analyzed product: {product_data.get('title', 'Unknown Product')}")
-        logger.info(f"Found {len(secondhand_alternatives)} secondhand alternatives and {len(sustainable_alternatives)} sustainable alternatives")
-        logger.info(f"Processing time: {time.time() - start_time:.2f} seconds")
+        # Calculate processing time
+        processing_time = time.time() - start_time
+        product_info['processing_time'] = f"{processing_time:.2f} seconds"
         
-        return jsonify(response)
+        return jsonify(product_info)
         
     except Exception as e:
-        logger.error(f"Error in analyze_product endpoint: {str(e)}")
-        logger.error(traceback.format_exc())
-        return jsonify({
-            "error": f"Could not analyze this product. Please make sure the backend server is running. Error: {str(e)}",
-            "success": False
-        }), 500
+        app.logger.error(f"Error analyzing product: {str(e)}")
+        app.logger.error(traceback.format_exc())
+        return jsonify({"error": f"Could not analyze this product. Please make sure the backend server is running. Error: {str(e)}"}), 500
 
 @app.route('/api/health', methods=['GET'])
 def health_check():

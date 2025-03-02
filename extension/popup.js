@@ -146,6 +146,13 @@ document.addEventListener('DOMContentLoaded', function() {
         // API endpoint
         const apiUrl = 'http://127.0.0.1:8000/api/analyze';
         
+        // Show loading state
+        const productSection = document.querySelector('.product-section');
+        productSection.innerHTML = `
+            <h3>Current Product</h3>
+            <p class="loading">Analyzing product sustainability...</p>
+        `;
+        
         // Fetch product info
         fetch(apiUrl, {
             method: 'POST',
@@ -161,6 +168,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 return response.json();
             })
             .then(data => {
+                console.log('API response:', data);
+                
+                // Check if the API returned an error
+                if (data.error) {
+                    throw new Error(data.error || 'API returned unsuccessful response');
+                }
+                
                 // Store the sustainability data for this tab
                 chrome.storage.local.set({
                     [`sustainability_${tabId}`]: data
@@ -170,7 +184,6 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .catch(error => {
                 console.error('Error fetching product data:', error);
-                const productSection = document.querySelector('.product-section');
                 productSection.innerHTML = `
                     <h3>Current Product</h3>
                     <p class="error">Could not analyze this product. Please make sure the backend server is running.</p>
@@ -182,7 +195,8 @@ document.addEventListener('DOMContentLoaded', function() {
     function displayProductInfo(data) {
         const productSection = document.querySelector('.product-section');
         
-        if (!data.product || !data.product.title) {
+        // Check if we have valid product data
+        if (!data || !data.title) {
             productSection.innerHTML = `
                 <h3>Current Product</h3>
                 <p>Could not identify product on this page.</p>
@@ -191,8 +205,9 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         // Get sustainability data with null checks
-        const score = data.product.sustainability_score || 0;
-        const factors = data.product.eco_factors || [];
+        const ecoFactors = data.eco_factors || [0, []];
+        const score = ecoFactors[0] || 0;
+        const factors = ecoFactors[1] || [];
         const scoreColor = getSustainabilityColor(score);
         
         // Determine sustainability level based on score
@@ -212,95 +227,88 @@ document.addEventListener('DOMContentLoaded', function() {
             factorsHtml += '</ul>';
         }
         
-        // Combine secondhand and sustainable alternatives
-        const alternatives = [
-            ...(data.secondhand_alternatives || []),
-            ...(data.sustainable_alternatives || [])
-        ];
+        // Get alternatives from the API response
+        const secondHandAlts = data.secondhand_alternatives || [];
+        const sustainableAlts = data.sustainable_alternatives || [];
         
         // Create alternatives section
         let alternativesHtml = '';
-        if (alternatives && Array.isArray(alternatives) && alternatives.length > 0) {
-            // Separate second-hand and sustainable alternatives
-            const secondHandAlts = data.secondhand_alternatives || [];
-            const sustainableAlts = data.sustainable_alternatives || [];
-            
-            // Create second-hand alternatives section
-            if (secondHandAlts.length > 0) {
-                alternativesHtml += '<h4>Second-Hand Alternatives</h4><div class="alternatives">';
-                secondHandAlts.forEach(alt => {
-                    const altScore = alt.sustainability_score || 0;
-                    const altScoreColor = getSustainabilityColor(altScore);
-                    const altUrl = alt.link || alt.url || '#';
-                    const isGenericUrl = !altUrl.includes('item') && !altUrl.includes('product') && !altUrl.includes('dp/');
-                    
-                    alternativesHtml += `
-                        <div class="alternative-item">
-                            <div class="alt-title">${alt.title || 'Unknown Product'}</div>
-                            <div class="alt-details">
-                                <span class="alt-price">${alt.price || '$0.00'}</span>
-                                <span class="alt-source">${alt.source || 'Unknown Source'}</span>
-                                ${alt.condition ? `<span class="alt-condition">Condition: ${alt.condition}</span>` : ''}
-                                <span class="alt-score" style="color: ${altScoreColor}">
-                                    Score: ${altScore}/100
-                                </span>
-                            </div>
-                            <a href="${altUrl}" target="_blank" class="view-alt-btn" 
-                               title="${isGenericUrl ? 'This will take you to the marketplace homepage where you can search for similar items' : 'View this product'}">
-                               ${isGenericUrl ? 'Visit Marketplace' : 'View'}</a>
+        
+        // Create second-hand alternatives section
+        if (secondHandAlts.length > 0 && document.getElementById('showSecondHand').checked) {
+            alternativesHtml += '<h4>Second-Hand Alternatives</h4><div class="alternatives">';
+            secondHandAlts.forEach(alt => {
+                const altScore = alt.sustainability_score || 85; // Default high score for second-hand
+                const altScoreColor = getSustainabilityColor(altScore);
+                const altUrl = alt.link || alt.url || '#';
+                const isGenericUrl = !altUrl.includes('item') && !altUrl.includes('product') && !altUrl.includes('dp/');
+                
+                alternativesHtml += `
+                    <div class="alternative-item">
+                        <div class="alt-title">${alt.title || 'Unknown Product'}</div>
+                        <div class="alt-details">
+                            <span class="alt-price">${alt.price || '$0.00'}</span>
+                            <span class="alt-source">${alt.source || 'Unknown Source'}</span>
+                            ${alt.condition ? `<span class="alt-condition">Condition: ${alt.condition}</span>` : ''}
+                            <span class="alt-score" style="color: ${altScoreColor}">
+                                Score: ${altScore}/100
+                            </span>
                         </div>
-                    `;
-                });
-                alternativesHtml += '</div>';
-            }
-            
-            // Create sustainable alternatives section
-            if (sustainableAlts.length > 0) {
-                alternativesHtml += '<h4>Sustainable Brand Alternatives</h4><div class="alternatives">';
-                sustainableAlts.forEach(alt => {
-                    const altScore = alt.sustainability_score || 0;
-                    const altScoreColor = getSustainabilityColor(altScore);
-                    const altUrl = alt.link || alt.url || '#';
-                    const isGenericUrl = !altUrl.includes('item') && !altUrl.includes('product') && !altUrl.includes('dp/');
-                    
-                    // Create eco-factors list if available
-                    let ecoFactorsHtml = '';
-                    if (alt.eco_factors && Array.isArray(alt.eco_factors) && alt.eco_factors.length > 0) {
-                        ecoFactorsHtml = '<ul class="eco-factors">';
-                        alt.eco_factors.forEach(factor => {
-                            ecoFactorsHtml += `<li>${factor}</li>`;
-                        });
-                        ecoFactorsHtml += '</ul>';
-                    }
-                    
-                    alternativesHtml += `
-                        <div class="alternative-item">
-                            <div class="alt-title">${alt.title || 'Unknown Product'}</div>
-                            <div class="alt-details">
-                                <span class="alt-price">${alt.price || '$0.00'}</span>
-                                <span class="alt-source">${alt.source || 'Unknown Source'}</span>
-                                <span class="alt-score" style="color: ${altScoreColor}">
-                                    Score: ${altScore}/100
-                                </span>
-                            </div>
-                            ${ecoFactorsHtml}
-                            <a href="${altUrl}" target="_blank" class="view-alt-btn"
-                               title="${isGenericUrl ? 'This will take you to the brand\'s website where you can browse similar sustainable products' : 'View this product'}">
-                               ${isGenericUrl ? 'Visit Brand' : 'View'}</a>
+                        <a href="${altUrl}" target="_blank" class="view-alt-btn" 
+                           title="${isGenericUrl ? 'This will take you to the marketplace homepage where you can search for similar items' : 'View this product'}">
+                           ${isGenericUrl ? 'Visit Marketplace' : 'View Item'}</a>
+                    </div>
+                `;
+            });
+            alternativesHtml += '</div>';
+        }
+        
+        // Create sustainable alternatives section
+        if (sustainableAlts.length > 0 && document.getElementById('showSustainable').checked) {
+            alternativesHtml += '<h4>Sustainable Brand Alternatives</h4><div class="alternatives">';
+            sustainableAlts.forEach(alt => {
+                const altScore = alt.sustainability_score || 75; // Default good score for sustainable
+                const altScoreColor = getSustainabilityColor(altScore);
+                const altUrl = alt.link || alt.url || '#';
+                const isGenericUrl = !altUrl.includes('item') && !altUrl.includes('product') && !altUrl.includes('dp/');
+                
+                // Create eco-factors list if available
+                let ecoFactorsHtml = '';
+                if (alt.eco_factors && Array.isArray(alt.eco_factors) && alt.eco_factors.length > 0) {
+                    ecoFactorsHtml = '<ul class="eco-factors">';
+                    alt.eco_factors.forEach(factor => {
+                        ecoFactorsHtml += `<li>${factor}</li>`;
+                    });
+                    ecoFactorsHtml += '</ul>';
+                }
+                
+                alternativesHtml += `
+                    <div class="alternative-item">
+                        <div class="alt-title">${alt.title || 'Unknown Product'}</div>
+                        <div class="alt-details">
+                            <span class="alt-price">${alt.price || '$0.00'}</span>
+                            <span class="alt-source">${alt.source || 'Unknown Source'}</span>
+                            <span class="alt-score" style="color: ${altScoreColor}">
+                                Score: ${altScore}/100
+                            </span>
                         </div>
-                    `;
-                });
-                alternativesHtml += '</div>';
-            }
+                        ${ecoFactorsHtml}
+                        <a href="${altUrl}" target="_blank" class="view-alt-btn"
+                           title="${isGenericUrl ? 'This will take you to the brand\'s website where you can browse similar sustainable products' : 'View this product'}">
+                           ${isGenericUrl ? 'Visit Brand' : 'View Item'}</a>
+                    </div>
+                `;
+            });
+            alternativesHtml += '</div>';
         }
         
         // Update product section HTML
         productSection.innerHTML = `
             <h3>Current Product</h3>
             <div class="product-card">
-                ${data.product.image_url ? `<img src="${data.product.image_url}" alt="${data.product.title}" class="product-image">` : ''}
-                <h4 class="product-title">${data.product.title}</h4>
-                <div class="product-price">${data.product.price}</div>
+                ${data.image_url ? `<img src="${data.image_url}" alt="${data.title}" class="product-image">` : ''}
+                <h4 class="product-title">${data.title}</h4>
+                <div class="product-price">${data.price || 'Price not available'}</div>
                 
                 <div class="sustainability-score">
                     <div class="score-label">Sustainability Score:</div>
@@ -333,8 +341,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 const reconsideredCount = (stats.reconsideredCount || 0) + 1;
                 let moneySaved = stats.moneySaved || 0;
                 
-                if (data.product && data.product.price) {
-                    const priceStr = data.product.price.replace(/[^\d.]/g, '');
+                if (data && data.price) {
+                    const priceStr = data.price.replace(/[^\d.]/g, '');
                     const price = parseFloat(priceStr);
                     if (!isNaN(price)) {
                         moneySaved += price;
