@@ -29,6 +29,188 @@ app = Flask(__name__)
 # Enable CORS for all routes
 CORS(app)
 
+def calculate_packaging_impact(product_data):
+    """
+    Calculate the environmental impact of product packaging
+    Returns a dictionary with packaging impact metrics
+    """
+    try:
+        logger.info(f"Calculating packaging impact for: {product_data.get('title', 'Unknown Product')}")
+        
+        # Default values
+        packaging_impact = {
+            "materials": [],
+            "waste_weight_g": 0,
+            "recyclability_score": 0,
+            "carbon_footprint_g": 0,
+            "water_usage_l": 0,
+            "impact_score": 50,  # Default neutral score
+            "impact_level": "Medium",
+            "impact_factors": ["Estimated based on product category and size"]
+        }
+        
+        # Extract product information
+        title = product_data.get('title', '').lower()
+        description = product_data.get('description', '').lower()
+        category = product_data.get('category', '').lower()
+        
+        # Determine product category if not provided
+        if not category:
+            electronics_keywords = ['phone', 'laptop', 'computer', 'tablet', 'tv', 'electronic', 'headphone', 'earbud', 'camera']
+            clothing_keywords = ['shirt', 'pants', 'dress', 'jacket', 'sweater', 'hoodie', 'jeans', 'shoes', 'boots', 'hat']
+            home_keywords = ['chair', 'table', 'desk', 'sofa', 'bed', 'mattress', 'pillow', 'blanket', 'lamp', 'rug']
+            beauty_keywords = ['makeup', 'skincare', 'lotion', 'shampoo', 'conditioner', 'soap', 'perfume']
+            food_keywords = ['coffee', 'tea', 'snack', 'chocolate', 'cereal', 'food']
+            
+            if any(keyword in title for keyword in electronics_keywords):
+                category = 'electronics'
+            elif any(keyword in title for keyword in clothing_keywords):
+                category = 'clothing'
+            elif any(keyword in title for keyword in home_keywords):
+                category = 'home'
+            elif any(keyword in title for keyword in beauty_keywords):
+                category = 'beauty'
+            elif any(keyword in title for keyword in food_keywords):
+                category = 'food'
+            else:
+                category = 'other'
+        
+        # Estimate packaging materials based on category
+        if category == 'electronics':
+            packaging_impact["materials"] = ["Cardboard", "Plastic", "Foam"]
+            packaging_impact["waste_weight_g"] = 250
+            packaging_impact["recyclability_score"] = 60
+            packaging_impact["carbon_footprint_g"] = 500
+            packaging_impact["water_usage_l"] = 20
+            packaging_impact["impact_score"] = 30
+            packaging_impact["impact_level"] = "High"
+            packaging_impact["impact_factors"] = [
+                "Electronics typically use mixed materials that are harder to recycle",
+                "Protective foam packaging has high environmental impact",
+                "Plastic film and ties contribute to waste"
+            ]
+        elif category == 'clothing':
+            packaging_impact["materials"] = ["Plastic bag", "Cardboard tags"]
+            packaging_impact["waste_weight_g"] = 50
+            packaging_impact["recyclability_score"] = 40
+            packaging_impact["carbon_footprint_g"] = 100
+            packaging_impact["water_usage_l"] = 5
+            packaging_impact["impact_score"] = 40
+            packaging_impact["impact_level"] = "Medium"
+            packaging_impact["impact_factors"] = [
+                "Plastic polybags are often not recycled",
+                "Multiple clothing items may be individually wrapped"
+            ]
+        elif category == 'home':
+            packaging_impact["materials"] = ["Cardboard", "Plastic", "Styrofoam"]
+            packaging_impact["waste_weight_g"] = 500
+            packaging_impact["recyclability_score"] = 70
+            packaging_impact["carbon_footprint_g"] = 800
+            packaging_impact["water_usage_l"] = 30
+            packaging_impact["impact_score"] = 25
+            packaging_impact["impact_level"] = "High"
+            packaging_impact["impact_factors"] = [
+                "Large items require substantial packaging materials",
+                "Styrofoam protection is difficult to recycle",
+                "Multiple cardboard layers for protection"
+            ]
+        elif category == 'beauty':
+            packaging_impact["materials"] = ["Plastic", "Cardboard", "Paper"]
+            packaging_impact["waste_weight_g"] = 100
+            packaging_impact["recyclability_score"] = 50
+            packaging_impact["carbon_footprint_g"] = 200
+            packaging_impact["water_usage_l"] = 10
+            packaging_impact["impact_score"] = 45
+            packaging_impact["impact_level"] = "Medium"
+            packaging_impact["impact_factors"] = [
+                "Mixed material packaging (plastic and cardboard)",
+                "Small items often over-packaged for presentation"
+            ]
+        elif category == 'food':
+            packaging_impact["materials"] = ["Cardboard", "Plastic film"]
+            packaging_impact["waste_weight_g"] = 150
+            packaging_impact["recyclability_score"] = 80
+            packaging_impact["carbon_footprint_g"] = 150
+            packaging_impact["water_usage_l"] = 8
+            packaging_impact["impact_score"] = 60
+            packaging_impact["impact_level"] = "Medium"
+            packaging_impact["impact_factors"] = [
+                "Food packaging is typically recyclable cardboard",
+                "May include plastic film that's harder to recycle"
+            ]
+        else:
+            packaging_impact["materials"] = ["Cardboard", "Plastic"]
+            packaging_impact["waste_weight_g"] = 200
+            packaging_impact["recyclability_score"] = 65
+            packaging_impact["carbon_footprint_g"] = 300
+            packaging_impact["water_usage_l"] = 15
+            packaging_impact["impact_score"] = 50
+            packaging_impact["impact_level"] = "Medium"
+            packaging_impact["impact_factors"] = [
+                "Standard Amazon packaging with cardboard and air pillows",
+                "Mixed recyclability of materials"
+            ]
+        
+        # Check for eco-friendly packaging keywords in description
+        eco_packaging_keywords = [
+            'recyclable packaging', 'plastic-free packaging', 'sustainable packaging',
+            'minimal packaging', 'eco-friendly packaging', 'biodegradable packaging',
+            'compostable packaging', 'recycled packaging', 'frustration-free packaging'
+        ]
+        
+        for keyword in eco_packaging_keywords:
+            if keyword in description:
+                packaging_impact["impact_score"] += 15
+                packaging_impact["recyclability_score"] += 20
+                packaging_impact["impact_factors"].append(f"Product mentions {keyword}")
+                logger.info(f"Found eco-friendly packaging mention: {keyword}")
+                break  # Only apply bonus once
+        
+        # Check for excessive packaging keywords
+        excessive_packaging_keywords = [
+            'box in box', 'multiple boxes', 'excessive packaging',
+            'over packaged', 'too much packaging'
+        ]
+        
+        # Look for these keywords in reviews if available
+        reviews = product_data.get('reviews', [])
+        review_text = ' '.join(reviews).lower() if reviews else ''
+        
+        for keyword in excessive_packaging_keywords:
+            if keyword in review_text or keyword in description:
+                packaging_impact["impact_score"] -= 15
+                packaging_impact["impact_factors"].append(f"Reviews mention {keyword}")
+                logger.info(f"Found excessive packaging mention: {keyword}")
+                break  # Only apply penalty once
+        
+        # Ensure score is within 0-100 range
+        packaging_impact["impact_score"] = max(0, min(packaging_impact["impact_score"], 100))
+        
+        # Update impact level based on final score
+        if packaging_impact["impact_score"] >= 75:
+            packaging_impact["impact_level"] = "Low"
+        elif packaging_impact["impact_score"] >= 50:
+            packaging_impact["impact_level"] = "Medium"
+        else:
+            packaging_impact["impact_level"] = "High"
+        
+        logger.info(f"Calculated packaging impact score: {packaging_impact['impact_score']} with level: {packaging_impact['impact_level']}")
+        return packaging_impact
+        
+    except Exception as e:
+        logger.error(f"Error calculating packaging impact: {str(e)}")
+        logger.error(traceback.format_exc())
+        return {
+            "materials": ["Cardboard", "Plastic"],
+            "waste_weight_g": 200,
+            "recyclability_score": 65,
+            "carbon_footprint_g": 300,
+            "water_usage_l": 15,
+            "impact_score": 50,
+            "impact_level": "Medium",
+            "impact_factors": ["Error calculating detailed packaging impact"]
+        }
+
 # Sustainability Metric Calculation
 def calculate_sustainability_metric(product_data):
     """
@@ -161,9 +343,13 @@ def analyze_product():
         # Calculate eco-factors
         eco_factors = calculate_sustainability_metric(product_info)
         
-        # Add alternatives and eco-factors to the response
+        # Calculate packaging impact
+        packaging_impact = calculate_packaging_impact(product_info)
+        
+        # Add alternatives, eco-factors, and packaging impact to the response
         product_info['secondhand_alternatives'] = secondhand_alternatives
         product_info['eco_factors'] = eco_factors
+        product_info['packaging_impact'] = packaging_impact
         
         # Calculate processing time
         processing_time = time.time() - start_time

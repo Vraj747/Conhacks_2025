@@ -227,6 +227,51 @@ document.addEventListener('DOMContentLoaded', function() {
             factorsHtml += '</ul>';
         }
         
+        // Get packaging impact data with null checks
+        let packagingHtml = '';
+        if (data.packaging_impact) {
+            const packagingImpact = data.packaging_impact;
+            const impactScore = packagingImpact.impact_score || 0;
+            const impactLevel = packagingImpact.impact_level || 'Medium';
+            const impactFactors = packagingImpact.impact_factors || [];
+            const materials = packagingImpact.materials || [];
+            const wasteWeight = packagingImpact.waste_weight_g || 0;
+            const carbonFootprint = packagingImpact.carbon_footprint_g || 0;
+            const waterUsage = packagingImpact.water_usage_l || 0;
+            
+            // Determine color based on impact level (inverse of sustainability - higher score means lower impact)
+            let impactColor = '#F44336'; // Red for high impact
+            if (impactScore >= 75) {
+                impactColor = '#4CAF50'; // Green for low impact
+            } else if (impactScore >= 50) {
+                impactColor = '#FFC107'; // Yellow/amber for medium impact
+            }
+            
+            packagingHtml = `
+                <div class="packaging-impact">
+                    <h4>Packaging Environmental Impact</h4>
+                    <div class="impact-score" style="display: flex; align-items: center; margin-bottom: 10px;">
+                        <div style="width: 40px; height: 40px; border-radius: 50%; background: conic-gradient(${impactColor} ${impactScore * 3.6}deg, #e0e0e0 ${impactScore * 3.6}deg 360deg); display: flex; align-items: center; justify-content: center; margin-right: 10px;">
+                            <span style="font-weight: bold;">${impactScore}</span>
+                        </div>
+                        <span style="font-weight: bold; color: ${impactColor};">${impactLevel} Impact</span>
+                    </div>
+                    <div class="impact-details">
+                        <p><strong>Materials:</strong> ${materials.join(', ')}</p>
+                        <p><strong>Estimated waste:</strong> ${wasteWeight}g</p>
+                        <p><strong>Carbon footprint:</strong> ${carbonFootprint}g CO₂</p>
+                        <p><strong>Water usage:</strong> ${waterUsage}L</p>
+                    </div>
+                    <div class="impact-factors">
+                        <h5>Impact Factors:</h5>
+                        <ul>
+                            ${impactFactors.map(factor => `<li>${factor}</li>`).join('')}
+                        </ul>
+                    </div>
+                </div>
+            `;
+        }
+        
         // Get alternatives from the API response
         const secondHandAlts = data.secondhand_alternatives || [];
         const sustainableAlts = data.sustainable_alternatives || [];
@@ -241,7 +286,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 const altScore = alt.sustainability_score || 85; // Default high score for second-hand
                 const altScoreColor = getSustainabilityColor(altScore);
                 const altUrl = alt.link || alt.url || '#';
-                const isGenericUrl = !altUrl.includes('item') && !altUrl.includes('product') && !altUrl.includes('dp/');
+                
+                // Check if this is a search URL or a specific product link
+                const isSearchUrl = alt.isSearchUrl || (!altUrl.includes('item') && !altUrl.includes('product') && !altUrl.includes('dp/'));
                 
                 alternativesHtml += `
                     <div class="alternative-item">
@@ -255,8 +302,8 @@ document.addEventListener('DOMContentLoaded', function() {
                             </span>
                         </div>
                         <a href="${altUrl}" target="_blank" class="view-alt-btn" 
-                           title="${isGenericUrl ? 'This will take you to the marketplace homepage where you can search for similar items' : 'View this product'}">
-                           ${isGenericUrl ? 'Visit Marketplace' : 'View Item'}</a>
+                           title="${isSearchUrl ? 'This will take you to the marketplace homepage where you can search for similar items' : 'View this specific second-hand product'}">
+                           ${isSearchUrl ? 'Visit Marketplace' : 'View Item'}</a>
                     </div>
                 `;
             });
@@ -270,7 +317,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 const altScore = alt.sustainability_score || 75; // Default good score for sustainable
                 const altScoreColor = getSustainabilityColor(altScore);
                 const altUrl = alt.link || alt.url || '#';
-                const isGenericUrl = !altUrl.includes('item') && !altUrl.includes('product') && !altUrl.includes('dp/');
+                
+                // Check if this is a search URL or a specific product link
+                const isSearchUrl = alt.isSearchUrl || (!altUrl.includes('item') && !altUrl.includes('product') && !altUrl.includes('dp/'));
                 
                 // Create eco-factors list if available
                 let ecoFactorsHtml = '';
@@ -294,47 +343,41 @@ document.addEventListener('DOMContentLoaded', function() {
                         </div>
                         ${ecoFactorsHtml}
                         <a href="${altUrl}" target="_blank" class="view-alt-btn"
-                           title="${isGenericUrl ? 'This will take you to the brand\'s website where you can browse similar sustainable products' : 'View this product'}">
-                           ${isGenericUrl ? 'Visit Brand' : 'View Item'}</a>
+                           title="${isSearchUrl ? 'This will take you to the brand\'s website where you can browse similar sustainable products' : 'View this specific sustainable product'}">
+                           ${isSearchUrl ? 'Visit Brand' : 'View Item'}</a>
                     </div>
                 `;
             });
             alternativesHtml += '</div>';
         }
         
-        // Update product section HTML
+        // Create the product card with sustainability score and packaging impact
         productSection.innerHTML = `
             <h3>Current Product</h3>
             <div class="product-card">
-                ${data.image_url ? `<img src="${data.image_url}" alt="${data.title}" class="product-image">` : ''}
                 <h4 class="product-title">${data.title}</h4>
-                <div class="product-price">${data.price || 'Price not available'}</div>
-                
-                <div class="sustainability-score">
-                    <div class="score-label">Sustainability Score:</div>
-                    <div class="score-value" style="color: ${scoreColor}">
-                        ${score}/100
-                        <span class="score-level">(${level})</span>
+                <div class="product-price">${data.price}</div>
+                <div class="product-details">
+                    ${data.image_url ? `<img src="${data.image_url}" alt="${data.title}" class="product-image">` : ''}
+                    <div class="sustainability-score">
+                        <h4>Sustainability Score</h4>
+                        <div class="score-circle" style="background: conic-gradient(${scoreColor} ${score * 3.6}deg, #e0e0e0 ${score * 3.6}deg 360deg);">
+                            <span>${score}</span>
+                        </div>
+                        <p class="score-level">${level} Sustainability</p>
+                        ${factorsHtml}
                     </div>
                 </div>
-                
-                ${factorsHtml}
-                
-                <div class="actions">
-                    <button id="continueBtn" class="action-btn continue">Continue with Purchase</button>
-                    <button id="skipBtn" class="action-btn skip">Skip this Purchase</button>
+                ${packagingHtml}
+                <div class="product-actions">
+                    <button id="skipBtn" class="action-button">Skip This Purchase</button>
+                    <a href="${data.url}" target="_blank" class="action-button secondary">View on Amazon</a>
                 </div>
             </div>
-            
             ${alternativesHtml}
         `;
         
         // Add button event listeners
-        document.getElementById('continueBtn').addEventListener('click', function() {
-            // Just close the popup to continue with purchase
-            window.close();
-        });
-        
         document.getElementById('skipBtn').addEventListener('click', function() {
             // Update stats for skipped purchase
             chrome.storage.local.get(['reconsideredCount', 'moneySaved'], function(stats) {

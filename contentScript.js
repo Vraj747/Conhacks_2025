@@ -156,7 +156,14 @@ function displayProductInfo(data) {
         html += '<div style="margin-bottom: 15px;">';
         
         if (secondhandCount > 0) {
-            html += `<p>Found ${secondhandCount} second-hand alternatives</p>`;
+            // Count how many are actual product listings vs search URLs
+            const actualProductCount = data.secondhand_alternatives.filter(alt => !alt.isSearchUrl).length;
+            
+            if (actualProductCount > 0) {
+                html += `<p>Found ${actualProductCount} specific second-hand alternatives</p>`;
+            } else {
+                html += `<p>Found second-hand alternatives on marketplaces</p>`;
+            }
         }
         
         if (sustainableCount > 0) {

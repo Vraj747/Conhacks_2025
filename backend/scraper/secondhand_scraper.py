@@ -54,6 +54,27 @@ def search_ebay(product_name, max_results=5):
             try:
                 logger.info(f"eBay request attempt {attempt+1}")
                 response = requests.get(url, headers=headers, timeout=30)  # Increased timeout to 30 seconds
+                
+                # Check for service unavailable (eBay blocking our requests)
+                if response.status_code == 503:
+                    logger.warning(f"eBay returned 503 Service Unavailable on attempt {attempt+1}")
+                    if attempt == 2:  # Last attempt
+                        logger.error("All eBay request attempts returned 503 Service Unavailable")
+                        # Return a fallback result with the search URL
+                        return [{
+                            'title': f"{product_name} (Used)",
+                            'price': "Check listings",
+                            'link': url,
+                            'image_url': "https://i.ebayimg.com/images/g/default-item/s-l300.jpg",
+                            'condition': "Various Used Conditions",
+                            'seller': "Multiple Sellers",
+                            'source': 'eBay',
+                            'sustainability_score': 85,
+                            'isSearchUrl': True  # Flag that this is a search URL, not a specific item
+                        }]
+                    time.sleep(3)  # Wait longer before retrying
+                    continue
+                
                 break
             except requests.exceptions.Timeout:
                 logger.warning(f"eBay request timed out on attempt {attempt+1}")
@@ -1237,110 +1258,257 @@ def generate_mock_mercari_data(product_name, max_results=3):
 
 def find_secondhand_alternatives(product_name, max_results=6):
     """
-    Find second-hand alternatives for a product from multiple sources
+    Find second-hand alternatives for a product
     """
     logger.info(f"Finding second-hand alternatives for: {product_name}")
     
     try:
-        # Clean up the product name for better search results
+        # Clean the product name to improve search results
         cleaned_name = product_name
         
-        # Remove common patterns that might restrict search results
-        patterns_to_remove = [
-            r'\b\d+(\.\d+)?(mm|cm|m|inch|in|ft)\b',  # Sizes
-            r'\b\d+x\d+\b',  # Dimensions
-            r'\b\d{4,}\b',  # Long numbers (likely model numbers)
-            r'\b(black|white|red|blue|green|yellow|purple|pink|orange|brown|grey|gray|silver|gold)\b',  # Colors
-            r'\bsize \w+\b',  # Size indicators
-            r'\bmodel \w+\b',  # Model indicators
-            r'\bref:? \w+\b',  # Reference numbers
-            r'\bsku:? \w+\b',  # SKU numbers
-            r'\bpack of \d+\b',  # Pack quantities
-            r'\b\d+ pack\b',  # Pack quantities
-            r'\b\d+-piece\b',  # Piece quantities
-            r'\b\d+ piece\b',  # Piece quantities
-            r'\bwith \w+\b',  # Features that might be too specific
-            r'\bfor \w+\b',  # Purpose that might be too specific
-            r'\bversion \d+(\.\d+)?\b',  # Version numbers
-            r'\bv\d+(\.\d+)?\b',  # Version numbers
-            r'\b\d{2,4}p\b',  # Resolution
-            r'\b\d{2,4}k\b',  # Resolution
-            r'\b\d{1,2}th gen\b',  # Generation
-            r'\b\d{1,2}th generation\b',  # Generation
-            r'\b\(.*?\)\b',  # Text in parentheses
-            r'\[.*?\]',  # Text in brackets
-        ]
+        # Remove sizes (e.g., "32 inch", "5'x7'", "Queen Size")
+        cleaned_name = re.sub(r'\b\d+(\.\d+)?\s*(inch|in|feet|ft|cm|mm|m|\'|\"|\-inch)\b', '', cleaned_name, flags=re.IGNORECASE)
+        cleaned_name = re.sub(r'\b(twin|full|queen|king|california king|cal king|single|double)\s*size\b', '', cleaned_name, flags=re.IGNORECASE)
         
-        for pattern in patterns_to_remove:
-            cleaned_name = re.sub(pattern, '', cleaned_name, flags=re.IGNORECASE)
+        # Remove colors if they're in parentheses or after commas
+        cleaned_name = re.sub(r'\(.*?(black|white|red|blue|green|yellow|purple|pink|brown|gray|grey|silver|gold|orange).*?\)', '', cleaned_name, flags=re.IGNORECASE)
+        cleaned_name = re.sub(r',\s*(black|white|red|blue|green|yellow|purple|pink|brown|gray|grey|silver|gold|orange).*?($|,)', ',', cleaned_name, flags=re.IGNORECASE)
+        
+        # Remove model numbers and other specific identifiers
+        cleaned_name = re.sub(r'\b[A-Z0-9]+-[A-Z0-9]+\b', '', cleaned_name)
+        cleaned_name = re.sub(r'\bmodel\s+[A-Z0-9]+\b', '', cleaned_name, flags=re.IGNORECASE)
+        
+        # Remove common marketing terms
+        cleaned_name = re.sub(r'\b(new|latest|2023|2024|premium|deluxe|professional|pro|advanced|improved|enhanced|upgraded|special edition)\b', '', cleaned_name, flags=re.IGNORECASE)
         
         # Remove extra spaces and trim
         cleaned_name = re.sub(r'\s+', ' ', cleaned_name).strip()
         
         logger.info(f"Cleaned product name: {cleaned_name}")
         
-        # Try to identify the brand and product type for better search
-        brand_match = re.search(r'^(.*?)\s', cleaned_name)
-        brand = brand_match.group(1) if brand_match else ""
+        # Try to identify brand and product type for more focused search
+        brand_match = re.search(r'^([\w\s]+?)\s', cleaned_name)
+        product_type_match = re.search(r'\s([\w\s]+?)$', cleaned_name)
         
-        # Identify product type (usually the last word or two)
-        product_type_match = re.search(r'\s(\w+)$', cleaned_name)
-        product_type = product_type_match.group(1) if product_type_match else ""
-        
-        # Create a focused search term if we have both brand and product type
-        focused_search_term = cleaned_name
-        if brand and product_type and brand.lower() != product_type.lower():
-            focused_search_term = f"{brand} {product_type}"
-            logger.info(f"Created focused search term: {focused_search_term}")
+        focused_search_term = None
+        if brand_match and product_type_match:
+            brand = brand_match.group(1).strip()
+            product_type = product_type_match.group(1).strip()
+            if len(brand) > 2 and len(product_type) > 2:
+                focused_search_term = f"{brand} {product_type}"
+                logger.info(f"Created focused search term: {focused_search_term}")
         
         # If the cleaned name is too short, use the original
-        if len(cleaned_name) < 3:
+        if len(cleaned_name) < 5:
             cleaned_name = product_name
-            logger.warning(f"Cleaned name too short, using original: {product_name}")
+            logger.info(f"Cleaned name too short, using original: {cleaned_name}")
         
-        # If the focused search term is too short, use the cleaned name
-        if len(focused_search_term) < 3:
-            focused_search_term = cleaned_name
-            logger.warning(f"Focused search term too short, using cleaned name: {cleaned_name}")
+        search_term = focused_search_term or cleaned_name
         
-        # Create direct search URLs for reliable platforms
-        ebay_url = f"https://www.ebay.com/sch/i.html?_nkw={focused_search_term.replace(' ', '+')}&LH_ItemCondition=3000"
-        poshmark_url = f"https://poshmark.com/search?query={focused_search_term.replace(' ', '%20')}&condition=closet_condition_used"
-        mercari_url = f"https://www.mercari.com/search/?keyword={focused_search_term.replace(' ', '%20')}&status=Active&itemCondition=1"
-        
-        # Return direct search links to second-hand marketplaces
-        results = [
-            {
-                'title': f"{product_name} on eBay (Used)",
+        # Try to get actual product listings from eBay first
+        ebay_results = []
+        try:
+            logger.info(f"Attempting to get specific eBay product listings for: {search_term}")
+            ebay_results = search_ebay(search_term, max_results=3)
+        except Exception as e:
+            logger.error(f"Error getting eBay product listings: {str(e)}")
+            logger.error(traceback.format_exc())
+            # Create a fallback eBay search URL
+            search_query = search_term.replace(' ', '+')
+            ebay_url = f"https://www.ebay.com/sch/i.html?_nkw={search_query}&LH_ItemCondition=3000"
+            ebay_results = [{
+                'title': f"{search_term} (Used)",
                 'price': "Check listings",
                 'link': ebay_url,
-                'image_url': "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1b/EBay_logo.svg/1200px-EBay_logo.svg.png",
+                'image_url': "https://i.ebayimg.com/images/g/default-item/s-l300.jpg",
                 'condition': "Various Used Conditions",
                 'source': 'eBay',
-                'sustainability_score': 80,
-                'isSearchUrl': True
-            },
-            {
-                'title': f"{product_name} on Poshmark (Used)",
-                'price': "Check listings",
-                'link': poshmark_url,
-                'image_url': "https://di2ponv0v5otw.cloudfront.net/posts/default.jpg",
-                'condition': "Various Used Conditions",
-                'source': 'Poshmark',
                 'sustainability_score': 85,
-                'isSearchUrl': True
-            },
-            {
-                'title': f"{product_name} on Mercari (Used)",
-                'price': "Check listings",
-                'link': mercari_url,
-                'image_url': "https://about.mercari.com/assets/img/press/logo/logo.png",
-                'condition': "Various Used Conditions",
-                'source': 'Mercari',
-                'sustainability_score': 85,
-                'isSearchUrl': True
+                'isSearchUrl': True  # Flag that this is a search URL, not a specific item
+            }]
+            logger.info(f"Created fallback eBay search URL: {ebay_url}")
+        
+        # If we found actual product listings, prioritize those
+        results = []
+        
+        # Add actual eBay product listings if available
+        if ebay_results:
+            logger.info(f"Found {len(ebay_results)} specific eBay product listings")
+            for item in ebay_results:
+                item['isSearchUrl'] = False  # Mark as specific product link
+                results.append(item)
+        
+        # If we don't have enough results, add direct product listings as fallback
+        if len(results) < max_results:
+            remaining_slots = max_results - len(results)
+            logger.info(f"Attempting to find top {remaining_slots} eBay product listings")
+            
+            # Create search URL for eBay
+            search_query = search_term.replace(' ', '+')
+            ebay_url = f"https://www.ebay.com/sch/i.html?_nkw={search_query}&LH_ItemCondition=3000"
+            
+            # Set up headers to mimic a browser
+            headers = {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                'Accept-Language': 'en-US,en;q=0.9',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+                'Connection': 'keep-alive',
+                'Referer': 'https://www.google.com/'
             }
-        ]
+            
+            # Try multiple times with increasing timeouts
+            item_count = 0
+            for attempt in range(3):
+                try:
+                    timeout = 15 + (attempt * 5)  # Start with 15s, then 20s, then 25s
+                    logger.info(f"Attempting to get top eBay results (attempt {attempt+1}/3, timeout={timeout}s)")
+                    
+                    response = requests.get(ebay_url, headers=headers, timeout=timeout)
+                    
+                    if response.status_code == 200:
+                        soup = BeautifulSoup(response.text, 'html.parser')
+                        
+                        # Try multiple selectors to find items
+                        selectors = [
+                            'li.s-item a.s-item__link',
+                            '.srp-results .s-item a.s-item__link',
+                            '.srp-list .s-item a.s-item__link',
+                            'a[href*="/itm/"]'
+                        ]
+                        
+                        items = []
+                        for selector in selectors:
+                            found_items = soup.select(selector)
+                            if found_items and len(found_items) > 1:  # Skip the first item which is often "More items like this"
+                                # Start from index 1 to skip the first item
+                                items = found_items[1:min(remaining_slots+1, len(found_items))]
+                                logger.info(f"Found {len(items)} items using selector: {selector}")
+                                break
+                        
+                        # Process found items (up to remaining_slots)
+                        item_count = 0
+                        for item_link in items:
+                            if item_count >= remaining_slots:
+                                break
+                                
+                            if 'href' in item_link.attrs:
+                                item_url = item_link.attrs['href']
+                                
+                                # Find the parent container to get title and price
+                                parent = item_link.find_parent('li') or item_link.find_parent('div')
+                                
+                                item_title_elem = None
+                                item_price_elem = None
+                                
+                                if parent:
+                                    item_title_elem = parent.select_one('.s-item__title')
+                                    item_price_elem = parent.select_one('.s-item__price')
+                                
+                                # If we couldn't find elements in the parent, try looking in the link itself
+                                if not item_title_elem:
+                                    item_title_elem = item_link.select_one('.s-item__title') or item_link
+                                
+                                if not item_price_elem:
+                                    item_price_elem = parent.select_one('.s-item__price') if parent else None
+                                
+                                item_title = item_title_elem.text if item_title_elem else search_term
+                                item_price = item_price_elem.text if item_price_elem else "Check price"
+                                
+                                # Skip "Shop on eBay" items
+                                if "Shop on eBay" in item_title:
+                                    logger.info("Skipping 'Shop on eBay' item")
+                                    continue
+                                
+                                logger.info(f"Found eBay result #{item_count+1}: {item_title} at {item_price}, URL: {item_url}")
+                                
+                                # Try to get image URL
+                                image_url = ""
+                                if parent:
+                                    img_elem = parent.select_one('img.s-item__image-img')
+                                    if img_elem:
+                                        image_url = img_elem.get('src', '')
+                                
+                                results.append({
+                                    'title': item_title,
+                                    'price': item_price,
+                                    'link': item_url,
+                                    'image_url': image_url,
+                                    'condition': 'Used',
+                                    'source': 'eBay',
+                                    'sustainability_score': 80,  # High score for second-hand
+                                    'isSearchUrl': False  # This is a specific product link
+                                })
+                                
+                                item_count += 1
+                        
+                        if item_count > 0:
+                            logger.info(f"Successfully added {item_count} eBay product listings")
+                            break  # Success, exit the retry loop
+                        else:
+                            logger.warning("Could not find valid eBay items in search results")
+                    else:
+                        logger.warning(f"Failed to get eBay search results, status code: {response.status_code}")
+                
+                except requests.exceptions.Timeout:
+                    logger.warning(f"eBay request timed out on attempt {attempt+1}/3 (timeout={timeout}s)")
+                    if attempt == 2:  # Last attempt
+                        logger.error("All eBay request attempts timed out")
+                except Exception as e:
+                    logger.error(f"Error getting eBay results on attempt {attempt+1}/3: {str(e)}")
+                    if attempt == 2:  # Last attempt
+                        logger.error(traceback.format_exc())
+                
+                # Wait before retrying
+                if attempt < 2:  # Don't sleep after the last attempt
+                    time.sleep(2)
+            
+            # We no longer fall back to search URL if no specific listings are found
+            if item_count == 0:
+                logger.warning("Could not find any eBay product listings after all attempts. Adding eBay search URL as fallback.")
+                # Add eBay search URL as fallback
+                ebay_search_url = f"https://www.ebay.com/sch/i.html?_nkw={search_query}&LH_ItemCondition=3000"
+                results.append({
+                    'title': f"Used {search_term} on eBay",
+                    'price': "Check price",
+                    'link': ebay_search_url,
+                    'image_url': "https://i.ebayimg.com/images/g/default-item/s-l300.jpg",
+                    'condition': "Various Used Conditions",
+                    'source': 'eBay',
+                    'sustainability_score': 85,
+                    'isSearchUrl': True  # Flag that this is a search URL, not a specific item
+                })
+                logger.info(f"Added eBay search URL as fallback: {ebay_search_url}")
+            
+            # Add Poshmark search URL
+            if len(results) < max_results:
+                poshmark_url = f"https://poshmark.com/search?query={search_query}&condition=closet_condition_used%2Ccloset_condition_nwt%2Ccloset_condition_nwot%2Ccloset_condition_gently_used"
+                results.append({
+                    'title': f"Used {search_term} on Poshmark",
+                    'price': "Check price",
+                    'link': poshmark_url,
+                    'image_url': '',
+                    'condition': 'Used',
+                    'source': 'Poshmark',
+                    'sustainability_score': 80,
+                    'isSearchUrl': True
+                })
+            
+            # Add Mercari search URL
+            if len(results) < max_results:
+                mercari_url = f"https://www.mercari.com/search/?keyword={search_query}&itemCondition=3"
+                results.append({
+                    'title': f"Used {search_term} on Mercari",
+                    'price': "Check price",
+                    'link': mercari_url,
+                    'image_url': '',
+                    'condition': 'Used',
+                    'source': 'Mercari',
+                    'sustainability_score': 80,
+                    'isSearchUrl': True
+                })
+        
+        # Limit to max_results
+        results = results[:max_results]
         
         logger.info(f"Returning {len(results)} second-hand alternatives")
         return results
@@ -1349,18 +1517,14 @@ def find_secondhand_alternatives(product_name, max_results=6):
         logger.error(f"Error in find_secondhand_alternatives: {str(e)}")
         logger.error(traceback.format_exc())
         
-        # Return a fallback result with basic search URLs
-        ebay_url = f"https://www.ebay.com/sch/i.html?_nkw={product_name.replace(' ', '+')}&LH_ItemCondition=3000"
-        
-        return [
-            {
-                'title': f"{product_name} on eBay (Used)",
-                'price': "Check listings",
-                'link': ebay_url,
-                'image_url': "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1b/EBay_logo.svg/1200px-EBay_logo.svg.png",
-                'condition': "Various Used Conditions",
-                'source': 'eBay',
-                'sustainability_score': 80,
-                'isSearchUrl': True
-            }
-        ] 
+        # Return a fallback result
+        return [{
+            'title': f"Used {product_name} on eBay",
+            'price': "Check price",
+            'link': f"https://www.ebay.com/sch/i.html?_nkw={product_name.replace(' ', '+')}&LH_ItemCondition=3000",
+            'image_url': '',
+            'condition': 'Used',
+            'source': 'eBay',
+            'sustainability_score': 80,
+            'isSearchUrl': True
+        }] 
