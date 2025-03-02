@@ -6657,3 +6657,46 @@ Compact Mouse: With a comfortable ...
 2025-03-02 02:59:36,050 - __main__ - INFO - Starting Do I Need That? API server
 2025-03-02 02:59:36,073 - werkzeug - WARNING -  * Debugger is active!
 2025-03-02 02:59:36,076 - werkzeug - INFO -  * Debugger PIN: 892-493-450
+2025-03-02 07:22:05,631 - werkzeug - INFO -  * Detected change in 'C:\\Users\\ms371\\OneDrive\\Desktop\\Conhacks_2025-master\\backend\\api\\catalog_api.py', reloading
+2025-03-02 07:22:05,747 - werkzeug - INFO -  * Restarting with stat
+2025-03-02 07:22:06,714 - __main__ - INFO - Starting Do I Need That? API server
+2025-03-02 07:22:06,746 - werkzeug - WARNING -  * Debugger is active!
+2025-03-02 07:22:06,749 - werkzeug - INFO -  * Debugger PIN: 892-493-450
+2025-03-02 07:22:13,834 - werkzeug - INFO -  * Detected change in 'C:\\Users\\ms371\\OneDrive\\Desktop\\Conhacks_2025-master\\backend\\api\\catalog_api.py', reloading
+2025-03-02 07:22:13,877 - werkzeug - INFO -  * Restarting with stat
+2025-03-02 07:22:14,612 - __main__ - INFO - Starting Do I Need That? API server
+2025-03-02 07:22:14,637 - werkzeug - WARNING -  * Debugger is active!
+2025-03-02 07:22:14,640 - werkzeug - INFO -  * Debugger PIN: 892-493-450
+2025-03-02 07:22:50,980 - werkzeug - INFO -  * Detected change in 'C:\\Users\\ms371\\OneDrive\\Desktop\\Conhacks_2025-master\\backend\\api\\database.py', reloading
+2025-03-02 07:22:51,029 - werkzeug - INFO -  * Restarting with stat
+2025-03-02 07:22:51,776 - __main__ - INFO - Starting Do I Need That? API server
+2025-03-02 07:22:51,802 - werkzeug - WARNING -  * Debugger is active!
+2025-03-02 07:22:51,805 - werkzeug - INFO -  * Debugger PIN: 892-493-450
+2025-03-02 07:23:20,051 - werkzeug - INFO -  * Detected change in 'C:\\Users\\ms371\\OneDrive\\Desktop\\Conhacks_2025-master\\backend\\api\\main.py', reloading
+2025-03-02 07:23:20,117 - werkzeug - INFO -  * Restarting with stat
+2025-03-02 07:43:41,284 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2025-03-02 07:43:41,284 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-03-02 07:43:41,286 - werkzeug - INFO -  * Restarting with stat
+2025-03-02 07:43:42,099 - werkzeug - WARNING -  * Debugger is active!
+2025-03-02 07:43:42,102 - werkzeug - INFO -  * Debugger PIN: 786-190-101
+2025-03-02 07:44:44,474 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2025-03-02 07:44:44,475 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-03-02 07:44:44,476 - werkzeug - INFO -  * Restarting with stat
+2025-03-02 07:44:45,265 - werkzeug - WARNING -  * Debugger is active!
+2025-03-02 07:44:45,268 - werkzeug - INFO -  * Debugger PIN: 892-493-450
+2025-03-02 07:44:48,539 - werkzeug - INFO - 127.0.0.1 - - [02/Mar/2025 07:44:48] "[33mGET / HTTP/1.1[0m" 404 -
+2025-03-02 07:44:48,773 - werkzeug - INFO - 127.0.0.1 - - [02/Mar/2025 07:44:48] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2025-03-02 07:46:10,476 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:8000
+2025-03-02 07:46:10,476 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-03-02 07:46:10,477 - werkzeug - INFO -  * Restarting with stat
+2025-03-02 07:46:11,336 - werkzeug - WARNING -  * Debugger is active!
+2025-03-02 07:46:11,339 - werkzeug - INFO -  * Debugger PIN: 892-493-450
+2025-03-02 07:56:29,789 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:8000
+2025-03-02 07:56:29,790 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-03-02 07:56:29,791 - werkzeug - INFO -  * Restarting with stat
+2025-03-02 07:56:30,597 - werkzeug - WARNING -  * Debugger is active!
+2025-03-02 07:56:30,600 - werkzeug - INFO -  * Debugger PIN: 892-493-450

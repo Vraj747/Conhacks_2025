@@ -13,6 +13,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 import difflib
+from backend.api.utils import extract_main_product_name
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -1263,8 +1264,12 @@ def find_secondhand_alternatives(product_name, max_results=6):
     logger.info(f"Finding second-hand alternatives for: {product_name}")
     
     try:
+        # First extract the main product name using the new function
+        main_product_name = extract_main_product_name(product_name)
+        logger.info(f"Extracted main product name: '{main_product_name}' from '{product_name}'")
+        
         # Clean the product name to improve search results
-        cleaned_name = product_name
+        cleaned_name = main_product_name
         
         # Remove sizes (e.g., "32 inch", "5'x7'", "Queen Size")
         cleaned_name = re.sub(r'\b\d+(\.\d+)?\s*(inch|in|feet|ft|cm|mm|m|\'|\"|\-inch)\b', '', cleaned_name, flags=re.IGNORECASE)

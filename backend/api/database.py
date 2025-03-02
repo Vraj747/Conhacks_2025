@@ -10,4 +10,4 @@ class Product(db.Model):
     price = db.Column(db.String(100), nullable=False)
     image_url = db.Column(db.String(255), nullable=False)
 
-# You can then set up functions to add, retrieve, or delete products.
+# You can then set up functions to add, retrieve, or delete products.
