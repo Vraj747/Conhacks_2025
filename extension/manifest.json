@@ -57,7 +57,7 @@
 	],
 	"web_accessible_resources": [
 		{
-			"resources": ["images/*", "*.js"],
+			"resources": ["images/*", "*.js", "*.css", "alternatives.css"],
 			"matches": ["<all_urls>"]
 		}
 	]

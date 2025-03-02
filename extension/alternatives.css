@@ -1,0 +1,345 @@
+/* Alternatives Popup Styling */
+/* This file contains styles for the second-hand alternatives popup */
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin: 0;
+  padding: 0;
+  color: #333;
+  background-color: #fff;
+  width: 500px;
+  max-width: 100%;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* Header styling */
+h1, h2 {
+  font-size: 22px;
+  color: #2E7D32;
+  margin: 0;
+  padding: 16px 20px;
+  border-bottom: 1px solid #e0e0e0;
+  background-color: #f9f9f9;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Close button in header */
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #999;
+  padding: 0;
+  margin: 0;
+  line-height: 1;
+}
+
+.close-btn:hover {
+  color: #666;
+}
+
+/* Original item section */
+.original-item {
+  padding: 16px 20px;
+  border-bottom: 1px solid #e0e0e0;
+  background-color: #f0f7f0;
+}
+
+.original-item h3 {
+  font-size: 16px;
+  color: #555;
+  margin: 0 0 12px 0;
+  font-weight: 600;
+}
+
+.original-product {
+  font-size: 14px;
+  line-height: 1.5;
+  margin-bottom: 8px;
+}
+
+.original-price {
+  font-weight: bold;
+  color: #2E7D32;
+  font-size: 16px;
+}
+
+/* Second-hand options section */
+.second-hand-options {
+  padding: 16px 20px;
+  max-height: calc(90vh - 200px);
+  overflow-y: auto;
+}
+
+.second-hand-options h3 {
+  font-size: 16px;
+  color: #2E7D32;
+  margin: 0 0 12px 0;
+  font-weight: 600;
+}
+
+.second-hand-description {
+  font-size: 14px;
+  color: #666;
+  font-style: italic;
+  margin-bottom: 16px;
+  line-height: 1.5;
+}
+
+/* Alternative item styling */
+.alternative-item {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+  position: relative;
+  background-color: #fff;
+  transition: all 0.2s ease;
+}
+
+.alternative-item:hover {
+  border-color: #4CAF50;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  transform: translateY(-3px);
+}
+
+.alternative-item h4 {
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0 0 12px 0;
+  padding-right: 100px;
+  line-height: 1.4;
+}
+
+/* Item details styling */
+.item-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  margin: 12px 0;
+}
+
+/* eBay specific styling */
+.ebay-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.ebay-item .ebay-logo {
+  color: #4CAF50;
+  font-weight: bold;
+  margin-right: 8px;
+}
+
+.condition-label {
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.price-label {
+  font-size: 16px;
+  font-weight: bold;
+  color: #2E7D32;
+  margin-bottom: 8px;
+}
+
+/* Item actions styling */
+.item-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 12px 0;
+}
+
+/* Credible source badge */
+.credible-source {
+  display: inline-block;
+  background-color: #4CAF50;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: bold;
+  margin-bottom: 12px;
+  border: none;
+  cursor: pointer;
+}
+
+.credible-source:before {
+  content: "✓";
+  margin-right: 4px;
+}
+
+/* Search tag styling */
+.search-tag {
+  display: inline-block;
+  background-color: #f0f7f0;
+  color: #2E7D32;
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-weight: 600;
+  border: 1px solid #e0e0e0;
+}
+
+/* Search results button */
+.search-results {
+  display: inline-block;
+  background-color: #4CAF50;
+  color: white !important; /* Ensure text is always white */
+  padding: 8px 16px;
+  border-radius: 4px;
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 13px;
+  margin-top: 8px;
+  transition: all 0.2s ease;
+  text-align: center;
+  width: 100%;
+}
+
+.search-results:hover {
+  background-color: #3d9c40;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  color: white !important; /* Ensure text stays white on hover */
+}
+
+/* View Similar Items button - specific styling */
+.search-results[title*="similar items"],
+.search-results[title*="search results"] {
+  color: white !important;
+  background-color: #4CAF50;
+}
+
+.search-results[title*="similar items"]:hover,
+.search-results[title*="search results"]:hover {
+  background-color: #3d9c40;
+  color: white !important;
+}
+
+/* No results message */
+.no-results {
+  padding: 20px;
+  text-align: center;
+  color: #666;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+  margin: 16px 0;
+}
+
+/* Note box styling */
+.note-box {
+  margin-top: 24px;
+  padding: 16px;
+  background-color: #f5f5f5;
+  border-radius: 10px;
+  font-size: 14px;
+  color: #555;
+  border-left: 4px solid #4CAF50;
+}
+
+.note-box p {
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Bottom action buttons */
+.action-buttons {
+  display: flex;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background-color: #f9f9f9;
+  border-top: 1px solid #e0e0e0;
+}
+
+.continue-btn {
+  background-color: #e0e0e0;
+  color: #424242;
+  padding: 10px 20px;
+  border-radius: 4px;
+  border: none;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 200px;
+}
+
+.continue-btn:hover {
+  background-color: #d0d0d0;
+}
+
+.skip-btn {
+  background-color: #4CAF50;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 4px;
+  border: none;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 200px;
+}
+
+.skip-btn:hover {
+  background-color: #3d9c40;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Specific styling for the elements in the screenshot */
+/* Various prices text */
+.various-prices {
+  color: #4CAF50;
+  font-weight: bold;
+  font-size: 16px;
+  margin-right: 10px;
+}
+
+/* eBay logo/text */
+.marketplace-logo {
+  font-weight: bold;
+  margin-right: 8px;
+}
+
+/* Ships nationwide text */
+.shipping-info {
+  color: #666;
+  font-size: 13px;
+  margin-left: 10px;
+}
+
+/* Condition label */
+.condition-info {
+  color: #666;
+  font-size: 13px;
+  margin-left: 10px;
+}
+
+/* Checkmark for verified */
+.verified-icon {
+  color: #4CAF50;
+  margin-right: 4px;
+}
+
+/* Popup container styling */
+.dineed-alternatives-popup {
+  background-color: white;
+  border-radius: 12px;
+  width: 800px;
+  max-width: 92%;
+  max-height: 90vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+} 

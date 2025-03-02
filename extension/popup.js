@@ -303,7 +303,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         </div>
                         <a href="${altUrl}" target="_blank" class="view-alt-btn" 
                            title="${isSearchUrl ? 'This will take you to the marketplace homepage where you can search for similar items' : 'View this specific second-hand product'}">
-                           ${isSearchUrl ? 'Visit Marketplace' : 'View Item'}</a>
+                           ${isSearchUrl ? 'Visit' : 'View'}</a>
                     </div>
                 `;
             });

@@ -203,26 +203,149 @@ function showReflectionPopup(e) {
     // Create popup overlay
     const overlay = document.createElement('div');
     overlay.className = 'dineed-overlay';
+    overlay.style.position = 'fixed';
+    overlay.style.top = '0';
+    overlay.style.left = '0';
+    overlay.style.width = '100%';
+    overlay.style.height = '100%';
+    overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+    overlay.style.zIndex = '2147483647'; // Maximum z-index
+    overlay.style.display = 'flex';
+    overlay.style.justifyContent = 'center';
+    overlay.style.alignItems = 'center';
     
+    // Create the popup with modern design
     const popup = document.createElement('div');
     popup.className = 'dineed-popup';
+    popup.style.backgroundColor = 'white';
+    popup.style.width = '450px';
+    popup.style.maxWidth = '92%';
+    popup.style.borderRadius = '12px';
+    popup.style.boxShadow = '0 10px 25px rgba(0,0,0,0.3)';
+    popup.style.overflow = 'hidden';
+    popup.style.fontFamily = 'Arial, sans-serif';
     
+    // Format product info if available
     let productInfo = '';
-    if (data.currentProduct && data.currentProduct.title) {
-      productInfo = `<p class="product-info">${data.currentProduct.title} - ${data.currentProduct.price}</p>`;
-    }
+    let productTitle = data.currentProduct && data.currentProduct.title ? data.currentProduct.title : '';
+    let productPrice = data.currentProduct && data.currentProduct.price ? data.currentProduct.price : '';
     
-    popup.innerHTML = `
-      <h2>Do I Need That?</h2>
-      <p>Take a moment to reflect on this purchase.</p>
-      ${productInfo}
-      <div class="dineed-buttons">
-        <button id="dineed-yes">Yes, I need it</button>
-        <button id="dineed-alternatives">Show me alternatives</button>
-        <button id="dineed-no">No, I'll skip it</button>
-      </div>
+    // Create header section
+    const headerSection = document.createElement('div');
+    headerSection.style.padding = '20px';
+    headerSection.style.textAlign = 'center';
+    headerSection.style.borderBottom = '1px solid #f0f0f0';
+    
+    headerSection.innerHTML = `
+      <h2 style="margin: 0; color: #333; font-size: 24px; font-weight: 600;">Do I Need That?</h2>
+      <p style="margin: 10px 0 0; color: #666; font-size: 16px;">Take a moment to reflect on this purchase.</p>
     `;
     
+    // Create product section
+    const productSection = document.createElement('div');
+    productSection.style.padding = '20px';
+    productSection.style.backgroundColor = '#f9f9f9';
+    productSection.style.borderBottom = '1px solid #f0f0f0';
+    productSection.style.fontSize = '14px';
+    productSection.style.lineHeight = '1.4';
+    productSection.style.textAlign = 'center';
+    
+    if (productTitle) {
+      productSection.innerHTML = `
+        <div style="font-weight: bold; margin-bottom: 8px; word-wrap: break-word;">${productTitle}</div>
+        <div style="font-size: 18px; color: #e47911; font-weight: bold;">${productPrice}</div>
+      `;
+    } else {
+      productSection.innerHTML = `<p style="margin: 0; font-style: italic; color: #999;">Product information not available</p>`;
+    }
+    
+    // Create buttons section
+    const buttonsSection = document.createElement('div');
+    buttonsSection.style.padding = '20px';
+    buttonsSection.style.display = 'flex';
+    buttonsSection.style.justifyContent = 'space-between';
+    buttonsSection.style.gap = '10px';
+    
+    // Yes, I need it button
+    const yesButton = document.createElement('button');
+    yesButton.id = 'dineed-yes';
+    yesButton.textContent = 'Yes, I need it';
+    yesButton.style.flex = '1';
+    yesButton.style.padding = '12px 0';
+    yesButton.style.border = 'none';
+    yesButton.style.borderRadius = '8px';
+    yesButton.style.backgroundColor = '#e0e0e0';
+    yesButton.style.color = '#333';
+    yesButton.style.fontWeight = 'bold';
+    yesButton.style.fontSize = '14px';
+    yesButton.style.cursor = 'pointer';
+    yesButton.style.transition = 'background-color 0.2s';
+    
+    // Add hover effect
+    yesButton.onmouseover = function() {
+      this.style.backgroundColor = '#d0d0d0';
+    };
+    yesButton.onmouseout = function() {
+      this.style.backgroundColor = '#e0e0e0';
+    };
+    
+    // Show alternatives button
+    const altButton = document.createElement('button');
+    altButton.id = 'dineed-alternatives';
+    altButton.textContent = 'Show alternatives';
+    altButton.style.flex = '1';
+    altButton.style.padding = '12px 0';
+    altButton.style.border = 'none';
+    altButton.style.borderRadius = '8px';
+    altButton.style.backgroundColor = '#4CAF50';
+    altButton.style.color = 'white';
+    altButton.style.fontWeight = 'bold';
+    altButton.style.fontSize = '14px';
+    altButton.style.cursor = 'pointer';
+    altButton.style.transition = 'background-color 0.2s';
+    
+    // Add hover effect
+    altButton.onmouseover = function() {
+      this.style.backgroundColor = '#3d9140';
+    };
+    altButton.onmouseout = function() {
+      this.style.backgroundColor = '#4CAF50';
+    };
+    
+    // No, I'll skip it button
+    const noButton = document.createElement('button');
+    noButton.id = 'dineed-no';
+    noButton.textContent = "No, I'll skip it";
+    noButton.style.flex = '1';
+    noButton.style.padding = '12px 0';
+    noButton.style.border = 'none';
+    noButton.style.borderRadius = '8px';
+    noButton.style.backgroundColor = '#2196F3';
+    noButton.style.color = 'white';
+    noButton.style.fontWeight = 'bold';
+    noButton.style.fontSize = '14px';
+    noButton.style.cursor = 'pointer';
+    noButton.style.transition = 'background-color 0.2s';
+    
+    // Add hover effect
+    noButton.onmouseover = function() {
+      this.style.backgroundColor = '#0b7dda';
+    };
+    noButton.onmouseout = function() {
+      this.style.backgroundColor = '#2196F3';
+    };
+    
+    // Add buttons to buttons section
+    buttonsSection.appendChild(yesButton);
+    buttonsSection.appendChild(altButton);
+    buttonsSection.appendChild(noButton);
+    
+    // Add all sections to popup
+    popup.appendChild(headerSection);
+    popup.appendChild(productSection);
+    popup.appendChild(buttonsSection);
+    
+    // Add popup to overlay
     overlay.appendChild(popup);
     document.body.appendChild(overlay);
     
@@ -317,13 +440,44 @@ function showReflectionPopup(e) {
       // Show loading state
       const loadingOverlay = document.createElement('div');
       loadingOverlay.className = 'dineed-overlay';
-      loadingOverlay.innerHTML = `
-        <div class="dineed-popup dineed-loading">
-          <h2>Finding sustainable alternatives...</h2>
-          <div class="dineed-spinner"></div>
-          <p>We're searching second-hand marketplaces and sustainable brands</p>
-        </div>
+      loadingOverlay.style.position = 'fixed';
+      loadingOverlay.style.top = '0';
+      loadingOverlay.style.left = '0';
+      loadingOverlay.style.width = '100%';
+      loadingOverlay.style.height = '100%';
+      loadingOverlay.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+      loadingOverlay.style.zIndex = '2147483647';
+      loadingOverlay.style.display = 'flex';
+      loadingOverlay.style.justifyContent = 'center';
+      loadingOverlay.style.alignItems = 'center';
+      
+      const loadingContent = document.createElement('div');
+      loadingContent.className = 'dineed-popup dineed-loading';
+      loadingContent.style.backgroundColor = 'white';
+      loadingContent.style.borderRadius = '12px';
+      loadingContent.style.padding = '30px';
+      loadingContent.style.width = '400px';
+      loadingContent.style.maxWidth = '90%';
+      loadingContent.style.textAlign = 'center';
+      loadingContent.style.boxShadow = '0 10px 25px rgba(0,0,0,0.3)';
+      
+      loadingContent.innerHTML = `
+        <h2 style="margin: 0 0 20px; color: #333; font-size: 22px;">Finding sustainable alternatives...</h2>
+        <div style="margin: 25px auto; width: 50px; height: 50px; border: 5px solid #f3f3f3; border-top: 5px solid #4CAF50; border-radius: 50%; animation: dineed-spin 1s linear infinite;"></div>
+        <p style="margin: 0; color: #666;">We're searching second-hand marketplaces and sustainable brands</p>
       `;
+      
+      // Add keyframe animation
+      const styleSheet = document.createElement('style');
+      styleSheet.textContent = `
+        @keyframes dineed-spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      `;
+      document.head.appendChild(styleSheet);
+      
+      loadingOverlay.appendChild(loadingContent);
       document.body.appendChild(loadingOverlay);
       
       // Find alternatives
@@ -456,12 +610,47 @@ function showSavedMessage() {
   // Show success message and automatically disappear
   const savedOverlay = document.createElement('div');
   savedOverlay.className = 'dineed-overlay dineed-fade';
-  savedOverlay.innerHTML = `
-    <div class="dineed-popup dineed-saved">
-      <h2>Good choice! 🌿</h2>
-      <p>You just helped reduce consumption and waste.</p>
-    </div>
+  savedOverlay.style.position = 'fixed';
+  savedOverlay.style.top = '0';
+  savedOverlay.style.left = '0';
+  savedOverlay.style.width = '100%';
+  savedOverlay.style.height = '100%';
+  savedOverlay.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+  savedOverlay.style.zIndex = '2147483647';
+  savedOverlay.style.display = 'flex';
+  savedOverlay.style.justifyContent = 'center';
+  savedOverlay.style.alignItems = 'center';
+  savedOverlay.style.animation = 'dineed-fadeout 3s forwards';
+  
+  // Add keyframe animation
+  const styleSheet = document.createElement('style');
+  styleSheet.textContent = `
+    @keyframes dineed-fadeout {
+      0% { opacity: 1; }
+      70% { opacity: 1; }
+      100% { opacity: 0; }
+    }
   `;
+  document.head.appendChild(styleSheet);
+  
+  const savedContent = document.createElement('div');
+  savedContent.className = 'dineed-popup dineed-saved';
+  savedContent.style.backgroundColor = '#E8F5E9';
+  savedContent.style.borderRadius = '12px';
+  savedContent.style.padding = '30px';
+  savedContent.style.width = '400px';
+  savedContent.style.maxWidth = '90%';
+  savedContent.style.textAlign = 'center';
+  savedContent.style.boxShadow = '0 10px 25px rgba(0,0,0,0.2)';
+  savedContent.style.border = '2px solid #4CAF50';
+  
+  savedContent.innerHTML = `
+    <div style="font-size: 50px; margin-bottom: 10px;">🌿</div>
+    <h2 style="margin: 0 0 15px; color: #2E7D32; font-size: 24px;">Good choice!</h2>
+    <p style="margin: 0; color: #444; font-size: 16px;">You just helped reduce consumption and waste.</p>
+  `;
+  
+  savedOverlay.appendChild(savedContent);
   document.body.appendChild(savedOverlay);
   
   // Remove after 3 seconds
@@ -480,13 +669,34 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     // Show loading overlay with custom message
     const loadingOverlay = document.createElement('div');
     loadingOverlay.className = 'dineed-overlay';
-    loadingOverlay.innerHTML = `
-      <div class="dineed-popup dineed-loading">
-        <h2>${request.message || 'Finding second-hand alternatives...'}</h2>
-        <div class="dineed-spinner"></div>
-        <p>We're searching for second-hand items on trusted marketplaces</p>
-      </div>
+    loadingOverlay.style.position = 'fixed';
+    loadingOverlay.style.top = '0';
+    loadingOverlay.style.left = '0';
+    loadingOverlay.style.width = '100%';
+    loadingOverlay.style.height = '100%';
+    loadingOverlay.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+    loadingOverlay.style.zIndex = '2147483647';
+    loadingOverlay.style.display = 'flex';
+    loadingOverlay.style.justifyContent = 'center';
+    loadingOverlay.style.alignItems = 'center';
+    
+    const loadingContent = document.createElement('div');
+    loadingContent.className = 'dineed-popup dineed-loading';
+    loadingContent.style.backgroundColor = 'white';
+    loadingContent.style.borderRadius = '12px';
+    loadingContent.style.padding = '30px';
+    loadingContent.style.width = '400px';
+    loadingContent.style.maxWidth = '90%';
+    loadingContent.style.textAlign = 'center';
+    loadingContent.style.boxShadow = '0 10px 25px rgba(0,0,0,0.3)';
+    
+    loadingContent.innerHTML = `
+      <h2 style="margin: 0 0 20px; color: #333; font-size: 22px;">${request.message || 'Finding second-hand alternatives...'}</h2>
+      <div style="margin: 25px auto; width: 50px; height: 50px; border: 5px solid #f3f3f3; border-top: 5px solid #4CAF50; border-radius: 50%; animation: dineed-spin 1s linear infinite;"></div>
+      <p style="margin: 0; color: #666;">We're searching for second-hand items on trusted marketplaces</p>
     `;
+    
+    loadingOverlay.appendChild(loadingContent);
     
     // Remove any existing overlays first
     removePopup();
@@ -495,16 +705,38 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     // Show error message
     const errorOverlay = document.createElement('div');
     errorOverlay.className = 'dineed-overlay';
-    errorOverlay.innerHTML = `
-      <div class="dineed-popup dineed-error">
-        <h2>Oops! Something went wrong</h2>
-        <p>${request.message || 'Could not find alternatives at this time.'}</p>
-        <div class="dineed-buttons">
-          <button id="dineed-error-close">Close</button>
-          <button id="dineed-error-retry">Try Again</button>
-        </div>
+    errorOverlay.style.position = 'fixed';
+    errorOverlay.style.top = '0';
+    errorOverlay.style.left = '0';
+    errorOverlay.style.width = '100%';
+    errorOverlay.style.height = '100%';
+    errorOverlay.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+    errorOverlay.style.zIndex = '2147483647';
+    errorOverlay.style.display = 'flex';
+    errorOverlay.style.justifyContent = 'center';
+    errorOverlay.style.alignItems = 'center';
+    
+    const errorContent = document.createElement('div');
+    errorContent.className = 'dineed-popup dineed-error';
+    errorContent.style.backgroundColor = '#FFF8F8';
+    errorContent.style.borderRadius = '12px';
+    errorContent.style.padding = '25px';
+    errorContent.style.width = '400px';
+    errorContent.style.maxWidth = '90%';
+    errorContent.style.textAlign = 'center';
+    errorContent.style.boxShadow = '0 10px 25px rgba(0,0,0,0.3)';
+    errorContent.style.border = '2px solid #F44336';
+    
+    errorContent.innerHTML = `
+      <h2 style="margin: 0 0 15px; color: #F44336; font-size: 22px;">Oops! Something went wrong</h2>
+      <p style="margin: 0 0 20px; color: #555;">${request.message || 'Could not find alternatives at this time.'}</p>
+      <div style="display: flex; justify-content: center; gap: 15px;">
+        <button id="dineed-error-close" style="<button id="dineed-error-close" style="padding: 10px 20px; background-color: #e0e0e0; color: #333; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">Close</button>
+        <button id="dineed-error-retry" style="padding: 10px 20px; background-color: #2196F3; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">Try Again</button>
       </div>
     `;
+    
+    errorOverlay.appendChild(errorContent);
     
     // Remove any existing overlays first
     removePopup();
@@ -526,7 +758,57 @@ function displayAlternatives(secondHand, sustainable, originalProduct) {
   // Create alternatives popup
   const alternativesOverlay = document.createElement('div');
   alternativesOverlay.className = 'dineed-overlay';
+  alternativesOverlay.style.position = 'fixed';
+  alternativesOverlay.style.top = '0';
+  alternativesOverlay.style.left = '0';
+  alternativesOverlay.style.width = '100%';
+  alternativesOverlay.style.height = '100%';
+  alternativesOverlay.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+  alternativesOverlay.style.zIndex = '2147483647';
+  alternativesOverlay.style.display = 'flex';
+  alternativesOverlay.style.justifyContent = 'center';
+  alternativesOverlay.style.alignItems = 'center';
   
+  // Create the alternatives popup container
+  const alternativesContainer = document.createElement('div');
+  alternativesContainer.className = 'dineed-alternatives-popup';
+  
+  // Add CSS link to the document if it doesn't exist
+  if (!document.querySelector('link[href*="alternatives.css"]')) {
+    const cssLink = document.createElement('link');
+    cssLink.rel = 'stylesheet';
+    cssLink.type = 'text/css';
+    cssLink.href = chrome.runtime.getURL('alternatives.css');
+    document.head.appendChild(cssLink);
+  }
+  
+  // Header section with title and close button
+  const headerSection = document.createElement('div');
+  headerSection.innerHTML = `
+    <h1>
+      Second-Hand Alternatives
+      <span class="close-btn">&times;</span>
+    </h1>
+  `;
+  
+  // Original product section
+  const originalSection = document.createElement('div');
+  originalSection.className = 'original-item';
+  
+  const originalTitle = originalProduct && originalProduct.title ? originalProduct.title : 'Unknown Product';
+  const originalPrice = originalProduct && originalProduct.price ? originalProduct.price : 'Price not available';
+  
+  originalSection.innerHTML = `
+    <h3>Original Item:</h3>
+    <div class="original-product">${originalTitle}</div>
+    <div class="original-price">${originalPrice}</div>
+  `;
+  
+  // Content section (scrollable)
+  const contentSection = document.createElement('div');
+  contentSection.className = 'second-hand-options';
+  
+  // Generate HTML for alternatives
   let secondHandHTML = '';
   if (secondHand && secondHand.length > 0) {
     secondHand.forEach(item => {
@@ -554,7 +836,7 @@ function displayAlternatives(secondHand, sustainable, originalProduct) {
         buttonText = 'View Similar Items';
         buttonTitle = 'This will take you to search results for similar items on this marketplace';
       } else if (!isSpecificUrl) {
-        buttonText = 'Visit Marketplace';
+        buttonText = 'Visit';
         buttonTitle = 'This will take you to the marketplace homepage';
       }
       
@@ -567,61 +849,59 @@ function displayAlternatives(secondHand, sustainable, originalProduct) {
       const distance = item.distance || 'Ships nationwide';
       
       secondHandHTML += `
-        <div class="dineed-alternative-item">
+        <div class="alternative-item">
           <h4>${title}</h4>
-          <div class="dineed-alt-details">
-            <span class="dineed-price">${price}</span>
-            <span class="dineed-source" title="Verified second-hand marketplace">${source} ✓</span>
-            <span class="dineed-distance">${distance}</span>
-            <span class="dineed-condition">Condition: ${condition}</span>
+          <div class="item-details">
+            <span class="price-label">${price}</span>
+            <div class="ebay-item">
+              <span class="ebay-logo">${source}</span>
+              <span class="verified-icon">✓</span>
+            </div>
+            <span class="shipping-info">${distance}</span>
+            <span class="condition-label">Condition: ${condition}</span>
           </div>
-          <div class="dineed-credibility">
-            <span class="dineed-credibility-badge" title="This source has buyer protection and verified sellers">Credible Source</span>
-            ${isSearchUrl || item.isSearchUrl ? '<span class="dineed-search-badge" title="This link will show you search results for similar items">Search Results</span>' : ''}
+          <div class="item-actions">
+            <button class="credible-source">Credible Source</button>
+            ${isSearchUrl || item.isSearchUrl ? 
+              '<span class="search-tag">Search Results</span>' : 
+              ''}
           </div>
-          <a href="${url}" target="_blank" class="dineed-view-btn" title="${buttonTitle}">${buttonText}</a>
+          <a href="${url}" target="_blank" class="search-results" title="${buttonTitle}">${buttonText}</a>
         </div>
       `;
     });
   }
   
-  // Ensure we have the original product info with defaults
-  const originalTitle = originalProduct && originalProduct.title ? originalProduct.title : 'Unknown Product';
-  const originalPrice = originalProduct && originalProduct.price ? originalProduct.price : 'Price not available';
-  
-  alternativesOverlay.innerHTML = `
-    <div class="dineed-alternatives-popup">
-      <div class="dineed-alt-header">
-        <h2>Second-Hand Alternatives</h2>
-        <button class="dineed-close">&times;</button>
-      </div>
-      
-      <div class="dineed-original">
-        <h3>Original Item:</h3>
-        <p>${originalTitle} - ${originalPrice}</p>
-      </div>
-      
-      <div class="dineed-alt-section">
-        <h3>Second-Hand Options</h3>
-        <p class="dineed-alt-description">These are verified second-hand items from trusted marketplaces with buyer protection.</p>
-        <div class="dineed-alt-container">
-          ${secondHandHTML.length ? secondHandHTML : '<p>No second-hand options found from credible sources</p>'}
-        </div>
-        <div class="dineed-search-explanation">
-          <p><strong>Note:</strong> Links will take you to search results for similar items on these marketplaces. From there, you can browse and filter to find the exact item you're looking for.</p>
-        </div>
-      </div>
-      
-      <div class="dineed-buttons">
-        <button id="dineed-continue-original">Continue with Original Purchase</button>
-        <button id="dineed-skip-purchase">Skip this Purchase</button>
-      </div>
+  contentSection.innerHTML = `
+    <h3>Second-Hand Options</h3>
+    <div class="second-hand-description">
+      These are verified second-hand items from trusted marketplaces with buyer protection.
+    </div>
+    ${secondHandHTML.length ? secondHandHTML : '<p class="no-results">No second-hand options found from credible sources</p>'}
+    <div class="note-box">
+      <p><strong>Note:</strong> Links will take you to search results for similar items on these marketplaces. From there, you can browse and filter to find the exact item you're looking for.</p>
     </div>
   `;
   
+  // Buttons section
+  const buttonsSection = document.createElement('div');
+  buttonsSection.className = 'action-buttons';
+  
+  buttonsSection.innerHTML = `
+    <button id="dineed-continue-original" class="continue-btn">Continue with Original Purchase</button>
+    <button id="dineed-skip-purchase" class="skip-btn">Skip this Purchase</button>
+  `;
+  
+  // Assemble the popup
+  alternativesContainer.appendChild(headerSection);
+  alternativesContainer.appendChild(originalSection);
+  alternativesContainer.appendChild(contentSection);
+  alternativesContainer.appendChild(buttonsSection);
+  alternativesOverlay.appendChild(alternativesContainer);
   document.body.appendChild(alternativesOverlay);
   
-  document.querySelector('.dineed-close').addEventListener('click', removePopup);
+  // Add event listeners for buttons
+  document.querySelector('.close-btn').addEventListener('click', removePopup);
   
   document.getElementById('dineed-continue-original').addEventListener('click', function() {
     // Mark that we've shown a popup for this product URL

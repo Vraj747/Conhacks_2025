@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Second-Hand Alternatives</title>
+  <link rel="stylesheet" href="alternatives.css">
+</head>
+<body>
+  <h1>
+    Second-Hand Alternatives
+    <span class="close-btn">×</span>
+  </h1>
+  
+  <div class="original-item">
+    <h3>Original Item:</h3>
+    <div class="original-product">
+      Amazon Fire TV Stick HD (newest model), free and live TV, Alexa Voice Remote, smart home controls, HD streaming
+    </div>
+    <div class="original-price">$49.99</div>
+  </div>
+  
+  <div class="second-hand-options">
+    <h3>Second-Hand Options</h3>
+    <div class="second-hand-description">
+      These are verified second-hand items from trusted marketplaces with buyer protection.
+    </div>
+    
+    <div class="alternative-item">
+      <h4>Find "Amazon Fire TV Stick HD (newest model), free and live TV, Alexa Voice Remote, smart home controls, HD streaming" on eBay</h4>
+      
+      <div class="item-details">
+        <span class="various-prices">Various prices</span>
+        <span class="marketplace-logo">eBay</span>
+        <span class="verified-icon">✓</span>
+        <span class="shipping-info">Ships nationwide</span>
+        <span class="condition-info">Condition: Used</span>
+      </div>
+      
+      <div class="item-actions">
+        <button class="credible-source">Credible Source</button>
+        <span class="search-tag">Search Results</span>
+      </div>
+      
+      <a href="#" class="search-results" title="This will take you to search results for similar items on this marketplace">View Similar Items</a>
+    </div>
+    
+    <!-- You can add more alternative items here if needed -->
+    
+  </div>
+  
+  <div class="action-buttons">
+    <button class="continue-btn">Continue with Original Purchase</button>
+    <button class="skip-btn">Skip this Purchase</button>
+  </div>
+  
+  <script>
+    // This is just a template, so we're not adding any JavaScript functionality
+    // The actual functionality would be handled by the extension's JavaScript
+    document.querySelector('.close-btn').addEventListener('click', function() {
+      console.log('Close button clicked');
+    });
+    
+    document.querySelector('.continue-btn').addEventListener('click', function() {
+      console.log('Continue with original purchase clicked');
+    });
+    
+    document.querySelector('.skip-btn').addEventListener('click', function() {
+      console.log('Skip this purchase clicked');
+    });
+    
+    document.querySelector('.search-results').addEventListener('click', function(e) {
+      e.preventDefault();
+      console.log('Search results clicked');
+    });
+  </script>
+</body>
+</html> 

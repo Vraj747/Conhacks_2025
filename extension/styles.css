@@ -1,393 +1,736 @@
-.dineed-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.7);
-    z-index: 99999;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-  
-  .dineed-popup {
-    background-color: white;
-    border-radius: 8px;
-    padding: 20px;
-    width: 400px;
-    max-width: 90%;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    text-align: center;
-  }
-  
-  /* Error popup styles */
-  .dineed-error {
-    background-color: #FFF8F8;
-    border: 2px solid #F44336;
-  }
-  
-  .dineed-error h2 {
-    color: #F44336;
-    margin-top: 0;
-  }
-  
-  .dineed-error p {
-    color: #555;
-    margin-bottom: 20px;
-  }
-  
-  #dineed-error-close {
-    background-color: #e0e0e0;
-    color: #333;
-  }
-  
-  #dineed-error-retry {
-    background-color: #2196F3;
-    color: white;
-  }
-  
-  .dineed-buttons {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    margin-top: 20px;
-  }
-  
-  .dineed-buttons button {
-    padding: 8px 16px;
-    border-radius: 4px;
-    border: none;
-    cursor: pointer;
-    font-weight: bold;
-    transition: background-color 0.3s;
-  }
-  
-  #dineed-yes, #dineed-continue-original {
-    background-color: #e0e0e0;
-    color: #333;
-  }
-  
-  #dineed-alternatives {
-    background-color: #4CAF50;
-    color: white;
-  }
-  
-  #dineed-no, #dineed-skip-purchase {
-    background-color: #2196F3;
-    color: white;
-  }
-  
-  .dineed-loading {
-    text-align: center;
-  }
-  
-  .dineed-spinner {
-    border: 4px solid #f3f3f3;
-    border-top: 4px solid #4CAF50;
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    animation: dineed-spin 2s linear infinite;
-    margin: 20px auto;
-  }
-  
-  @keyframes dineed-spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  }
-  
-  .dineed-alternatives-popup {
-    width: 800px;
-    max-width: 90%;
-    max-height: 90vh;
-    overflow-y: auto;
-    padding: 0;
-    background-color: white;
-    border-radius: 8px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-  }
-  
-  .dineed-alt-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 15px 20px;
-    border-bottom: 1px solid #e0e0e0;
-  }
-  
-  .dineed-alt-header h2 {
-    margin: 0;
-    color: #2196F3;
-  }
-  
-  .dineed-close {
-    background: none;
-    border: none;
-    font-size: 24px;
-    cursor: pointer;
-    color: #666;
-  }
-  
-  .dineed-original {
-    padding: 15px 20px;
-    background-color: #f9f9f9;
-    border-bottom: 1px solid #e0e0e0;
-  }
-  
-  .dineed-alt-section {
-    padding: 15px 20px;
-    border-bottom: 1px solid #e0e0e0;
-  }
-  
-  .dineed-alt-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 15px;
-    margin-top: 15px;
-  }
-  
-  .dineed-alternative-item {
-    border: 1px solid #e0e0e0;
-    border-radius: 6px;
-    padding: 12px;
-    transition: transform 0.3s, box-shadow 0.3s;
-    background-color: #fff;
-    position: relative;
-    overflow: hidden;
-  }
-  
-  .dineed-alternative-item:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    border-color: #2196F3;
-  }
-  
-  .dineed-alternative-item h4 {
-    margin-top: 0;
-    margin-bottom: 8px;
-    font-size: 15px;
-    color: #333;
-    line-height: 1.3;
-  }
-  
-  .dineed-alt-details {
-    margin: 10px 0;
-  }
-  
-  .dineed-price {
-    font-weight: bold;
-    color: #4CAF50;
-    font-size: 16px;
-    display: block;
-    margin-bottom: 5px;
-  }
-  
-  .dineed-view-btn {
-    display: inline-block;
-    background-color: #2196F3;
-    color: white;
-    padding: 8px 14px;
-    border-radius: 4px;
-    text-decoration: none;
-    font-weight: bold;
-    margin-top: 10px;
-    transition: background-color 0.2s;
-    text-align: center;
-    width: 100%;
-    box-sizing: border-box;
-  }
-  
-  .dineed-view-btn:hover {
-    background-color: #0b7dda;
-  }
-  
-  .dineed-saved {
-    text-align: center;
-    background-color: #E8F5E9;
-    border: 2px solid #4CAF50;
-  }
-  
-  .dineed-fade {
-    animation: dineed-fadeout 3s forwards;
-  }
-  
-  @keyframes dineed-fadeout {
-    0% { opacity: 1; }
-    70% { opacity: 1; }
-    100% { opacity: 0; }
-  }
-  
-  .product-info {
-    font-style: italic;
-    margin-top: 10px;
-    padding: 8px;
-    background-color: #f5f5f5;
-    border-radius: 4px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
+/* Add these CSS rules to your styles.css file */
 
-  /* New styles for the popup */
-  .product-image {
-    max-width: 100%;
-    max-height: 150px;
-    object-fit: contain;
-    margin-bottom: 10px;
-    border-radius: 4px;
-  }
+/* General styling improvements */
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin: 0;
+  padding: 16px;
+  width: 380px;
+  color: #333;
+  background-color: #f9f9f9;
+}
 
-  .alt-condition {
-    font-style: italic;
-    color: #666;
-  }
+h1 {
+  font-size: 24px;
+  margin: 0 0 4px 0;
+  color: #2E7D32;
+  font-weight: 600;
+}
 
-  .eco-factors {
-    margin: 8px 0;
-    padding-left: 20px;
-    font-size: 12px;
-    color: #4CAF50;
-  }
+p {
+  margin: 0 0 16px 0;
+  color: #666;
+  font-size: 14px;
+}
 
-  .eco-factors li {
-    margin-bottom: 3px;
-  }
+/* Stats section styling */
+.stats {
+  background-color: #f0f7f0;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  border-left: 4px solid #4CAF50;
+}
 
-  /* Make the alternatives section more compact */
-  .alternatives {
-    max-height: 300px;
-    overflow-y: auto;
-    margin-bottom: 15px;
-  }
+.stats h3 {
+  font-size: 16px;
+  margin: 0 0 8px 0;
+  color: #2E7D32;
+}
 
-  /* Add a badge for second-hand items */
-  .alt-source {
-    position: relative;
-    display: inline-block;
-  }
+.stat-item {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  font-size: 14px;
+}
 
-  .alt-source[title]:hover::after {
-    content: attr(title);
-    position: absolute;
-    bottom: 100%;
-    left: 50%;
-    transform: translateX(-50%);
-    background-color: #333;
-    color: white;
-    padding: 5px 10px;
-    border-radius: 4px;
-    font-size: 12px;
-    white-space: nowrap;
-    z-index: 1;
-  }
+/* Product section styling */
+.product-section {
+  background-color: #fff;
+  border-radius: 8px;
+  padding: 16px;
+  margin: 16px 0;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
 
-  .dineed-alt-description {
-    font-size: 14px;
-    color: #555;
-    margin: 10px 0;
-    font-style: italic;
-  }
+.product-section h3 {
+  font-size: 16px;
+  margin: 0 0 12px 0;
+  color: #2E7D32;
+  border-bottom: 1px solid #e0e0e0;
+  padding-bottom: 8px;
+}
 
-  .dineed-credibility {
-    margin: 10px 0;
-  }
+.loading {
+  color: #666;
+  font-style: italic;
+  font-size: 14px;
+}
 
-  .dineed-credibility-badge {
-    display: inline-block;
-    background-color: #4CAF50;
-    color: white;
-    font-size: 11px;
-    padding: 2px 6px;
-    border-radius: 10px;
-    font-weight: bold;
-  }
+.error {
+  color: #D32F2F;
+  font-size: 14px;
+}
 
-  .dineed-condition {
-    display: block;
-    margin-top: 5px;
-    font-size: 13px;
-    color: #555;
-    font-weight: bold;
-  }
+.supported-sites {
+  font-size: 12px;
+  color: #666;
+  font-style: italic;
+  margin-top: 5px;
+}
 
-  .dineed-source {
-    font-weight: bold;
-    color: #333;
-    display: block;
-    margin-bottom: 5px;
-  }
+/* Product card styling */
+.product-card {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 16px;
+  background-color: white;
+}
 
-  .dineed-distance {
-    font-size: 12px;
-    color: #666;
-    display: block;
-    margin-bottom: 5px;
-  }
+.product-title {
+  margin-top: 0;
+  margin-bottom: 8px;
+  font-size: 14px;
+  line-height: 1.4;
+  font-weight: 600;
+}
 
-  /* Add a verified checkmark style */
-  .dineed-source::after {
-    content: "";
-    display: inline-block;
-    width: 6px;
-    height: 12px;
-    border-bottom: 2px solid #4CAF50;
-    border-right: 2px solid #4CAF50;
-    transform: rotate(45deg);
-    margin-left: 5px;
-    vertical-align: middle;
-  }
+.product-price {
+  font-weight: bold;
+  font-size: 18px;
+  margin-bottom: 12px;
+  color: #2E7D32;
+}
 
-  /* Search badge styles */
-  .dineed-search-badge {
-    display: inline-block;
-    background-color: #2196F3;
-    color: white;
-    font-size: 11px;
-    padding: 2px 6px;
-    border-radius: 10px;
-    font-weight: bold;
-    margin-left: 8px;
-  }
-  
-  .dineed-search-info {
-    font-size: 12px;
-    color: #666;
-    font-style: italic;
-    margin: 5px 0;
-  }
+.product-details {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
 
-  .dineed-search-explanation {
-    margin-top: 15px;
-    padding: 10px;
-    background-color: #f5f5f5;
-    border-radius: 4px;
-    font-size: 13px;
-    color: #555;
-    border-left: 3px solid #2196F3;
-  }
+.product-image {
+  max-width: 80px;
+  max-height: 80px;
+  margin-right: 16px;
+  border-radius: 4px;
+  border: 1px solid #eee;
+}
 
-  .dineed-search-explanation p {
-    margin: 0;
-    line-height: 1.4;
-  }
+/* Sustainability score styling */
+.sustainability-score {
+  flex: 1;
+}
 
-  /* Make the buttons more prominent */
-  #dineed-continue-original {
-    background-color: #e0e0e0;
-    color: #333;
-    padding: 10px 16px;
-    font-size: 14px;
-  }
+.sustainability-score h4 {
+  font-size: 14px;
+  margin: 0 0 8px 0;
+  color: #555;
+}
 
-  #dineed-skip-purchase {
-    background-color: #2196F3;
-    color: white;
-    padding: 10px 16px;
-    font-size: 14px;
-  }
+.score-circle {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 8px;
+  font-weight: bold;
+  color: white;
+  font-size: 18px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
 
-  .dineed-buttons {
-    padding: 15px;
-    border-top: 1px solid #e0e0e0;
-    background-color: #f9f9f9;
-  }
+.score-level {
+  text-align: center;
+  font-weight: 600;
+  font-size: 12px;
+  margin: 4px 0;
+  text-transform: uppercase;
+}
+
+.factors {
+  margin: 12px 0;
+  padding-left: 20px;
+  font-size: 13px;
+}
+
+.factors li {
+  margin-bottom: 6px;
+  line-height: 1.4;
+}
+
+/* Button styling */
+.product-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.action-button {
+  flex: 1;
+  min-width: 100px;
+  padding: 8px 12px;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 13px;
+  text-align: center;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.action-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.action-button:not(.secondary) {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.action-button:not(.secondary):hover {
+  background-color: #3d9c40;
+}
+
+.action-button.secondary {
+  background-color: #f5f5f5;
+  color: #333;
+  border: 1px solid #ddd;
+}
+
+.action-button.secondary:hover {
+  background-color: #e8e8e8;
+}
+
+/* Fix for the Visit Marketplace button */
+.view-alt-btn, 
+a[href*="marketplace"] {
+  display: inline-block;
+  background-color: #4CAF50;
+  color: white !important;
+  padding: 6px 12px !important;
+  border-radius: 4px;
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 12px !important;
+  text-align: center;
+  margin-left: 10px !important;
+  white-space: nowrap;
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  max-width: 120px;
+  transition: all 0.2s ease;
+}
+
+.view-alt-btn:hover {
+  background-color: #3d9c40;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Make sure the text doesn't overlap with the button */
+.alternative-item .alt-title, 
+.dineed-alternative-item h4 {
+  padding-right: 130px !important;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+/* Add right margin to condition text */
+.dineed-condition, 
+.alt-condition {
+  margin-right: 120px !important;
+  display: block;
+}
+
+/* Similarly for score display */
+.alt-score {
+  margin-right: 120px !important;
+  display: block;
+}
+
+/* Fix spacing in alternatives popup */
+.dineed-alt-details {
+  width: calc(100% - 130px) !important;
+}
+
+/* Settings section styling */
+.settings {
+  margin-top: 16px;
+  padding: 16px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+ 
+.settings h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #2E7D32;
+  margin: 0 0 12px 0;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #e0e0e0;
+}
+ 
+/* Toggle container styling */
+.toggle-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+ 
+.settings-label {
+  font-size: 14px;
+  color: #333;
+  flex: 1;
+}
+ 
+/* The toggle switch */
+.toggle {
+  position: relative;
+  display: inline-block;
+  width: 46px;
+  height: 24px;
+}
+ 
+/* Hide default HTML checkbox */
+.toggle input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+ 
+/* The slider */
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: .3s;
+  border-radius: 24px;
+}
+ 
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .3s;
+  border-radius: 50%;
+}
+ 
+input:checked + .slider {
+  background-color: #4CAF50;
+}
+ 
+input:focus + .slider {
+  box-shadow: 0 0 1px #4CAF50;
+}
+ 
+input:checked + .slider:before {
+  transform: translateX(22px);
+}
+ 
+/* Footer styling */
+.footer {
+  margin-top: 16px;
+  text-align: center;
+  font-size: 12px;
+  color: #777;
+  font-style: italic;
+  padding: 8px;
+}
+ 
+/* Confirmation overlay */
+.overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+}
+ 
+.confirmation-popup {
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  text-align: center;
+  max-width: 80%;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+ 
+.confirmation-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 15px;
+}
+ 
+.confirmation-buttons button {
+  padding: 8px 16px;
+  border-radius: 4px;
+  border: none;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+ 
+.confirmation-buttons .yes {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.confirmation-buttons .yes:hover {
+  background-color: #3d9c40;
+}
+ 
+.confirmation-buttons .no {
+  background-color: #e0e0e0;
+  color: #333;
+}
+
+.confirmation-buttons .no:hover {
+  background-color: #d0d0d0;
+}
+
+/* Alternatives section styling */
+#alternativesSection {
+  margin-top: 16px;
+  border-top: 1px solid #e0e0e0;
+  padding-top: 16px;
+}
+
+#alternativesSection h3 {
+  font-size: 16px;
+  margin: 0 0 12px 0;
+  color: #2E7D32;
+}
+
+.alternatives {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.alternative-item {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 12px;
+  position: relative;
+  background-color: #fff;
+  transition: all 0.2s ease;
+}
+
+.alternative-item:hover {
+  border-color: #4CAF50;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.alt-title {
+  font-weight: 600;
+  margin-bottom: 8px;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.alt-details {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+}
+
+.alt-price {
+  font-weight: bold;
+  color: #2E7D32;
+}
+
+.alt-source {
+  color: #666;
+}
+
+.alt-condition {
+  color: #666;
+}
+
+.alt-score {
+  font-weight: 600;
+}
+
+/* Success message styling */
+.success-message {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.success-content {
+  background-color: white;
+  border-radius: 8px;
+  padding: 24px;
+  width: 80%;
+  max-width: 300px;
+  text-align: center;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+}
+
+.success-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  color: #4CAF50;
+}
+
+.success-content h3 {
+  margin: 0 0 8px 0;
+  color: #2E7D32;
+}
+
+.success-content p {
+  margin: 0 0 8px 0;
+  font-size: 14px;
+}
+
+/* Alternatives Popup Styling - New Styles */
+/* This targets the popup shown in the screenshot */
+
+/* Main popup container */
+body.alternatives-popup {
+  width: 500px;
+  max-width: 100%;
+  background-color: #fff;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* Header styling for the alternatives popup */
+.alternatives-popup h1,
+.alternatives-popup h2 {
+  font-size: 22px;
+  color: #2196F3;
+  margin: 0 0 16px 0;
+  padding: 16px 20px;
+  border-bottom: 1px solid #e0e0e0;
+  background-color: #f9f9f9;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Close button in header */
+.alternatives-popup h1 .close-btn,
+.alternatives-popup h2 .close-btn {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #999;
+  padding: 0;
+  margin: 0;
+  line-height: 1;
+}
+
+.alternatives-popup h1 .close-btn:hover,
+.alternatives-popup h2 .close-btn:hover {
+  color: #666;
+}
+
+/* Original item section */
+.alternatives-popup .original-item {
+  padding: 16px 20px;
+  border-bottom: 1px solid #e0e0e0;
+  background-color: #f9f9f9;
+}
+
+.alternatives-popup .original-item h3 {
+  font-size: 16px;
+  color: #555;
+  margin: 0 0 12px 0;
+  font-weight: 600;
+}
+
+.alternatives-popup .original-product {
+  font-size: 14px;
+  line-height: 1.5;
+  margin-bottom: 8px;
+}
+
+.alternatives-popup .original-price {
+  font-weight: bold;
+  color: #2E7D32;
+  font-size: 16px;
+}
+
+/* Second-hand options section */
+.alternatives-popup .second-hand-options {
+  padding: 16px 20px;
+}
+
+.alternatives-popup .second-hand-options h3 {
+  font-size: 16px;
+  color: #2E7D32;
+  margin: 0 0 12px 0;
+  font-weight: 600;
+}
+
+.alternatives-popup .second-hand-description {
+  font-size: 14px;
+  color: #666;
+  font-style: italic;
+  margin-bottom: 16px;
+  line-height: 1.5;
+}
+
+/* Alternative item styling */
+.alternatives-popup .alternative-item {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+  position: relative;
+  background-color: #fff;
+  transition: all 0.2s ease;
+}
+
+.alternatives-popup .alternative-item:hover {
+  border-color: #4CAF50;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.alternatives-popup .alternative-item h4 {
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0 0 12px 0;
+  padding-right: 100px;
+  line-height: 1.4;
+}
+
+/* eBay specific styling */
+.alternatives-popup .ebay-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.alternatives-popup .ebay-item .ebay-logo {
+  color: #4CAF50;
+  font-weight: bold;
+  margin-right: 8px;
+}
+
+.alternatives-popup .condition-label {
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.alternatives-popup .price-label {
+  font-size: 16px;
+  font-weight: bold;
+  color: #2E7D32;
+  margin-bottom: 8px;
+}
+
+/* Credible source badge */
+.alternatives-popup .credible-source {
+  display: inline-block;
+  background-color: #4CAF50;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: bold;
+  margin-bottom: 12px;
+}
+
+.alternatives-popup .credible-source:before {
+  content: "✓";
+  margin-right: 4px;
+}
+
+/* Search results button */
+.alternatives-popup .search-results {
+  display: inline-block;
+  background-color: #2196F3;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 4px;
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 13px;
+  margin-top: 8px;
+  transition: all 0.2s ease;
+}
+
+.alternatives-popup .search-results:hover {
+  background-color: #1976D2;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Bottom action buttons */
+.alternatives-popup .action-buttons {
+  display: flex;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background-color: #f9f9f9;
+  border-top: 1px solid #e0e0e0;
+}
+
+.alternatives-popup .continue-btn {
+  background-color: #e0e0e0;
+  color: #424242;
+  padding: 10px 20px;
+  border-radius: 4px;
+  border: none;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.alternatives-popup .continue-btn:hover {
+  background-color: #d0d0d0;
+}
+
+.alternatives-popup .skip-btn {
+  background-color: #4CAF50;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 4px;
+  border: none;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.alternatives-popup .skip-btn:hover {
+  background-color: #3d9c40;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
