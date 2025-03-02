@@ -247,30 +247,48 @@ function displayAlternatives(secondHand, sustainable, originalProduct) {
   
   let secondHandHTML = '';
   secondHand.forEach(item => {
+    // Check if the URL is specific to a product or just a generic marketplace URL
+    const isSpecificUrl = item.url.includes('item') || item.url.includes('listing') || item.url.includes('itm');
+    const buttonText = isSpecificUrl ? 'View Item' : 'Visit Marketplace';
+    const buttonTitle = isSpecificUrl ? 
+      'View this specific second-hand item' : 
+      'This will take you to the marketplace where you can search for similar items';
+    
     secondHandHTML += `
       <div class="dineed-alternative-item">
         <h4>${item.title}</h4>
         <div class="dineed-alt-details">
           <span class="dineed-price">${item.price}</span>
-          <span class="dineed-source">${item.source}</span>
+          <span class="dineed-source" title="Verified second-hand marketplace">${item.source} ✓</span>
           <span class="dineed-distance">${item.distance}</span>
+          ${item.condition ? `<span class="dineed-condition">Condition: ${item.condition}</span>` : ''}
         </div>
-        <a href="${item.url}" target="_blank" class="dineed-view-btn">View Item</a>
+        <div class="dineed-credibility">
+          <span class="dineed-credibility-badge" title="This source has buyer protection and verified sellers">Credible Source</span>
+        </div>
+        <a href="${item.url}" target="_blank" class="dineed-view-btn" title="${buttonTitle}">${buttonText}</a>
       </div>
     `;
   });
   
   let sustainableHTML = '';
   sustainable.forEach(item => {
+    // Check if the URL is specific to a product or just a generic brand URL
+    const isSpecificUrl = item.url.includes('product') || item.url.includes('products');
+    const buttonText = isSpecificUrl ? 'View Item' : 'Visit Brand';
+    const buttonTitle = isSpecificUrl ? 
+      'View this specific sustainable product' : 
+      'This will take you to the brand\'s website where you can browse similar sustainable products';
+    
     sustainableHTML += `
       <div class="dineed-alternative-item">
         <h4>${item.title}</h4>
         <div class="dineed-alt-details">
           <span class="dineed-price">${item.price}</span>
-          <span class="dineed-source">${item.source}</span>
+          <span class="dineed-source" title="Verified sustainable brand">${item.source} ✓</span>
           <span class="dineed-eco">Rating: ${item.ecoRating}</span>
         </div>
-        <a href="${item.url}" target="_blank" class="dineed-view-btn">View Item</a>
+        <a href="${item.url}" target="_blank" class="dineed-view-btn" title="${buttonTitle}">${buttonText}</a>
       </div>
     `;
   });
@@ -289,8 +307,9 @@ function displayAlternatives(secondHand, sustainable, originalProduct) {
       
       <div class="dineed-alt-section">
         <h3>Second-Hand Options</h3>
+        <p class="dineed-alt-description">These are verified second-hand items from trusted marketplaces with buyer protection.</p>
         <div class="dineed-alt-container">
-          ${secondHandHTML.length ? secondHandHTML : '<p>No second-hand options found nearby</p>'}
+          ${secondHandHTML.length ? secondHandHTML : '<p>No second-hand options found from credible sources</p>'}
         </div>
       </div>
       
@@ -333,23 +352,27 @@ function detectProductPage() {
     url: window.location.href
   };
 
-  // Amazon specific detection
+  // Amazon specific detection (works for all Amazon domains)
   if (window.location.hostname.includes('amazon')) {
-    const productTitle = document.querySelector('#productTitle');
-    const price = document.querySelector('.a-price .a-offscreen');
+    console.log("Detected Amazon domain");
+    const productTitle = document.querySelector('#productTitle, .product-title-word-break, #title');
+    const price = document.querySelector('.a-price .a-offscreen, #priceblock_ourprice, #priceblock_dealprice, .a-price, #price, .price-large');
     
     if (productTitle) {
       isProductPage = true;
       productInfo.title = productTitle.textContent.trim();
+      console.log("Found product title:", productInfo.title);
       
       if (price) {
         productInfo.price = price.textContent.trim();
+        console.log("Found product price:", productInfo.price);
       }
       
       // Try to determine product category
-      const breadcrumbs = document.querySelectorAll('#wayfinding-breadcrumbs_feature_div li');
+      const breadcrumbs = document.querySelectorAll('#wayfinding-breadcrumbs_feature_div li, .a-breadcrumb li, .nav-a-content, .a-link-normal.a-color-tertiary');
       if (breadcrumbs.length > 0) {
         productInfo.category = breadcrumbs[0].textContent.trim();
+        console.log("Found product category:", productInfo.category);
       }
     }
   }

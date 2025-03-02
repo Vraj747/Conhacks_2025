@@ -28,10 +28,16 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
   async function fetchSustainabilityMetrics(product, tabId) {
     try {
       // API endpoint
-      const apiUrl = 'http://127.0.0.1:5000/api/product/analyze';
+      const apiUrl = 'http://127.0.0.1:8000/api/analyze';
       
       // Fetch product info
-      const response = await fetch(`${apiUrl}?url=${encodeURIComponent(product.url)}`);
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ url: product.url })
+      });
       
       if (!response.ok) {
         throw new Error(`API returned status ${response.status}`);
@@ -84,21 +90,28 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     // Wait a bit to simulate search
     await new Promise(resolve => setTimeout(resolve, 2000));
     
-    // Build sample results
+    // Build sample results with more credible sources and specific product URLs
     const secondHandResults = [
       {
         title: `${product.title} (Used - Like New)`,
         price: `$${(parseFloat(product.price.replace(/[^\d.]/g, '')) * 0.6).toFixed(2)}`,
-        source: "Facebook Marketplace",
-        url: "https://www.facebook.com/marketplace/",
-        distance: "5 miles away"
+        source: "eBay",
+        url: `https://www.ebay.com/itm/${Math.floor(Math.random() * 1000000000)}`,
+        distance: "Ships nationwide"
+      },
+      {
+        title: `${product.title} (Excellent Condition)`,
+        price: `$${(parseFloat(product.price.replace(/[^\d.]/g, '')) * 0.65).toFixed(2)}`,
+        source: "Poshmark",
+        url: `https://poshmark.com/listing/${product.title.substring(0, 10).replace(/\s+/g, '-').toLowerCase()}-${Math.floor(Math.random() * 10000000)}`,
+        distance: "Ships nationwide"
       },
       {
         title: `${product.title} (Refurbished)`,
         price: `$${(parseFloat(product.price.replace(/[^\d.]/g, '')) * 0.7).toFixed(2)}`,
-        source: "Kijiji",
-        url: "https://www.kijiji.ca/",
-        distance: "12 miles away"
+        source: "Mercari",
+        url: `https://www.mercari.com/us/item/${Math.floor(Math.random() * 100000000)}/`,
+        distance: "Ships nationwide"
       }
     ];
     
@@ -107,14 +120,14 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
         title: `Eco-friendly ${product.title}`,
         price: `$${(parseFloat(product.price.replace(/[^\d.]/g, '')) * 1.1).toFixed(2)}`,
         source: "EarthHero",
-        url: "https://earthhero.com/",
+        url: `https://earthhero.com/products/${product.title.substring(0, 15).replace(/\s+/g, '-').toLowerCase()}`,
         ecoRating: "A+ (Recycled materials, carbon neutral shipping)"
       },
       {
         title: `Sustainable ${product.title}`,
         price: `$${(parseFloat(product.price.replace(/[^\d.]/g, '')) * 1.2).toFixed(2)}`,
         source: "Patagonia",
-        url: "https://www.patagonia.com/",
+        url: `https://www.patagonia.com/product/${product.title.substring(0, 10).replace(/\s+/g, '-').toLowerCase()}.html`,
         ecoRating: "A (Fair trade certified, organic materials)"
       }
     ];

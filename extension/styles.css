@@ -180,3 +180,122 @@
     overflow: hidden;
     text-overflow: ellipsis;
   }
+
+  /* New styles for the popup */
+  .product-image {
+    max-width: 100%;
+    max-height: 150px;
+    object-fit: contain;
+    margin-bottom: 10px;
+    border-radius: 4px;
+  }
+
+  .alt-condition {
+    font-style: italic;
+    color: #666;
+  }
+
+  .eco-factors {
+    margin: 8px 0;
+    padding-left: 20px;
+    font-size: 12px;
+    color: #4CAF50;
+  }
+
+  .eco-factors li {
+    margin-bottom: 3px;
+  }
+
+  /* Make the alternatives section more compact */
+  .alternatives {
+    max-height: 300px;
+    overflow-y: auto;
+    margin-bottom: 15px;
+  }
+
+  /* Add a badge for second-hand items */
+  .alt-source {
+    position: relative;
+    display: inline-block;
+  }
+
+  .alt-source[title]:hover::after {
+    content: attr(title);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #333;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    white-space: nowrap;
+    z-index: 1;
+  }
+
+  .dineed-alt-description {
+    font-size: 14px;
+    color: #555;
+    margin-bottom: 10px;
+    font-style: italic;
+  }
+
+  .dineed-credibility {
+    margin-top: 5px;
+    margin-bottom: 8px;
+  }
+
+  .dineed-credibility-badge {
+    display: inline-block;
+    background-color: #4CAF50;
+    color: white;
+    font-size: 12px;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-weight: bold;
+  }
+
+  .dineed-condition {
+    display: inline-block;
+    margin-left: 8px;
+    font-size: 13px;
+    color: #555;
+  }
+
+  .dineed-source {
+    position: relative;
+    display: inline-block;
+    font-weight: bold;
+    color: #333;
+  }
+
+  /* Add a verified checkmark style */
+  .dineed-source::after {
+    content: "";
+    display: inline-block;
+    width: 6px;
+    height: 12px;
+    border-bottom: 2px solid #4CAF50;
+    border-right: 2px solid #4CAF50;
+    transform: rotate(45deg);
+    margin-left: 5px;
+    vertical-align: middle;
+  }
+
+  /* Improve the view button styling */
+  .dineed-view-btn {
+    display: inline-block;
+    background-color: #2196F3;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-weight: bold;
+    margin-top: 8px;
+    transition: background-color 0.2s;
+  }
+
+  .dineed-view-btn:hover {
+    background-color: #0b7dda;
+  }

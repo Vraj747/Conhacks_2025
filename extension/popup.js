@@ -117,14 +117,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
                 
                 // Check if we're on a supported product page
-                const isProductPage = /amazon\.com|walmart\.com|bestbuy\.com|ebay\.com/.test(currentUrl);
+                const isProductPage = /amazon\.(com|ca|co\.uk|de|fr|it|es|jp|in|com\.au|com\.mx)|walmart\.(com|ca)|bestbuy\.(com|ca)|ebay\.(com|ca|co\.uk|de|fr|it|es|com\.au)/.test(currentUrl);
                 
                 if (!isProductPage) {
                     const productSection = document.querySelector('.product-section');
                     productSection.innerHTML = `
                         <h3>Current Product</h3>
                         <p>No product detected. Visit a supported product page.</p>
-                        <p class="supported-sites">Supported sites: Amazon, Walmart, Best Buy, eBay</p>
+                        <p class="supported-sites">Supported sites: Amazon, Walmart, Best Buy, eBay (including regional domains)</p>
                     `;
                     return;
                 }
@@ -144,10 +144,16 @@ document.addEventListener('DOMContentLoaded', function() {
     
     function fetchSustainabilityData(url, tabId) {
         // API endpoint
-        const apiUrl = 'http://127.0.0.1:5000/api/product/analyze';
+        const apiUrl = 'http://127.0.0.1:8000/api/analyze';
         
         // Fetch product info
-        fetch(`${apiUrl}?url=${encodeURIComponent(url)}`)
+        fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ url: url })
+        })
             .then(response => {
                 if (!response.ok) {
                     throw new Error(`API returned status ${response.status}`);
@@ -184,55 +190,123 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         
-        // Get sustainability data
-        const sustainability = data.sustainability;
-        const scoreColor = getSustainabilityColor(sustainability.score);
+        // Get sustainability data with null checks
+        const score = data.product.sustainability_score || 0;
+        const factors = data.product.eco_factors || [];
+        const scoreColor = getSustainabilityColor(score);
         
-        // Create factors list
+        // Determine sustainability level based on score
+        let level = 'Poor';
+        if (score >= 80) level = 'Excellent';
+        else if (score >= 60) level = 'Good';
+        else if (score >= 40) level = 'Average';
+        else if (score >= 20) level = 'Below Average';
+        
+        // Create factors list with null check
         let factorsHtml = '';
-        if (sustainability.factors && sustainability.factors.length > 0) {
+        if (factors && Array.isArray(factors) && factors.length > 0) {
             factorsHtml = '<ul class="factors">';
-            sustainability.factors.forEach(factor => {
+            factors.forEach(factor => {
                 factorsHtml += `<li>${factor}</li>`;
             });
             factorsHtml += '</ul>';
         }
         
+        // Combine secondhand and sustainable alternatives
+        const alternatives = [
+            ...(data.secondhand_alternatives || []),
+            ...(data.sustainable_alternatives || [])
+        ];
+        
         // Create alternatives section
         let alternativesHtml = '';
-        if (data.alternatives && data.alternatives.length > 0) {
-            alternativesHtml = '<h4>Sustainable Alternatives</h4><div class="alternatives">';
-            data.alternatives.forEach(alt => {
-                const altScoreColor = getSustainabilityColor(alt.sustainability_score);
-                alternativesHtml += `
-                    <div class="alternative-item">
-                        <div class="alt-title">${alt.title}</div>
-                        <div class="alt-details">
-                            <span class="alt-price">${alt.price}</span>
-                            <span class="alt-source">${alt.source}</span>
-                            <span class="alt-score" style="color: ${altScoreColor}">
-                                Score: ${alt.sustainability_score}/100
-                            </span>
+        if (alternatives && Array.isArray(alternatives) && alternatives.length > 0) {
+            // Separate second-hand and sustainable alternatives
+            const secondHandAlts = data.secondhand_alternatives || [];
+            const sustainableAlts = data.sustainable_alternatives || [];
+            
+            // Create second-hand alternatives section
+            if (secondHandAlts.length > 0) {
+                alternativesHtml += '<h4>Second-Hand Alternatives</h4><div class="alternatives">';
+                secondHandAlts.forEach(alt => {
+                    const altScore = alt.sustainability_score || 0;
+                    const altScoreColor = getSustainabilityColor(altScore);
+                    const altUrl = alt.link || alt.url || '#';
+                    const isGenericUrl = !altUrl.includes('item') && !altUrl.includes('product') && !altUrl.includes('dp/');
+                    
+                    alternativesHtml += `
+                        <div class="alternative-item">
+                            <div class="alt-title">${alt.title || 'Unknown Product'}</div>
+                            <div class="alt-details">
+                                <span class="alt-price">${alt.price || '$0.00'}</span>
+                                <span class="alt-source">${alt.source || 'Unknown Source'}</span>
+                                ${alt.condition ? `<span class="alt-condition">Condition: ${alt.condition}</span>` : ''}
+                                <span class="alt-score" style="color: ${altScoreColor}">
+                                    Score: ${altScore}/100
+                                </span>
+                            </div>
+                            <a href="${altUrl}" target="_blank" class="view-alt-btn" 
+                               title="${isGenericUrl ? 'This will take you to the marketplace homepage where you can search for similar items' : 'View this product'}">
+                               ${isGenericUrl ? 'Visit Marketplace' : 'View'}</a>
                         </div>
-                        <a href="${alt.url}" target="_blank" class="view-alt-btn">View</a>
-                    </div>
-                `;
-            });
-            alternativesHtml += '</div>';
+                    `;
+                });
+                alternativesHtml += '</div>';
+            }
+            
+            // Create sustainable alternatives section
+            if (sustainableAlts.length > 0) {
+                alternativesHtml += '<h4>Sustainable Brand Alternatives</h4><div class="alternatives">';
+                sustainableAlts.forEach(alt => {
+                    const altScore = alt.sustainability_score || 0;
+                    const altScoreColor = getSustainabilityColor(altScore);
+                    const altUrl = alt.link || alt.url || '#';
+                    const isGenericUrl = !altUrl.includes('item') && !altUrl.includes('product') && !altUrl.includes('dp/');
+                    
+                    // Create eco-factors list if available
+                    let ecoFactorsHtml = '';
+                    if (alt.eco_factors && Array.isArray(alt.eco_factors) && alt.eco_factors.length > 0) {
+                        ecoFactorsHtml = '<ul class="eco-factors">';
+                        alt.eco_factors.forEach(factor => {
+                            ecoFactorsHtml += `<li>${factor}</li>`;
+                        });
+                        ecoFactorsHtml += '</ul>';
+                    }
+                    
+                    alternativesHtml += `
+                        <div class="alternative-item">
+                            <div class="alt-title">${alt.title || 'Unknown Product'}</div>
+                            <div class="alt-details">
+                                <span class="alt-price">${alt.price || '$0.00'}</span>
+                                <span class="alt-source">${alt.source || 'Unknown Source'}</span>
+                                <span class="alt-score" style="color: ${altScoreColor}">
+                                    Score: ${altScore}/100
+                                </span>
+                            </div>
+                            ${ecoFactorsHtml}
+                            <a href="${altUrl}" target="_blank" class="view-alt-btn"
+                               title="${isGenericUrl ? 'This will take you to the brand\'s website where you can browse similar sustainable products' : 'View this product'}">
+                               ${isGenericUrl ? 'Visit Brand' : 'View'}</a>
+                        </div>
+                    `;
+                });
+                alternativesHtml += '</div>';
+            }
         }
         
         // Update product section HTML
         productSection.innerHTML = `
             <h3>Current Product</h3>
             <div class="product-card">
+                ${data.product.image_url ? `<img src="${data.product.image_url}" alt="${data.product.title}" class="product-image">` : ''}
                 <h4 class="product-title">${data.product.title}</h4>
                 <div class="product-price">${data.product.price}</div>
                 
                 <div class="sustainability-score">
                     <div class="score-label">Sustainability Score:</div>
                     <div class="score-value" style="color: ${scoreColor}">
-                        ${sustainability.score}/100
-                        <span class="score-level">(${sustainability.level})</span>
+                        ${score}/100
+                        <span class="score-level">(${level})</span>
                     </div>
                 </div>
                 
@@ -314,5 +388,21 @@ document.addEventListener('DOMContentLoaded', function() {
                 document.body.removeChild(successMsg);
             }
         }, 3000);
+    }
+
+    // Function to check if URL is a product page
+    function isProductPage(url) {
+        const productPagePatterns = [
+            /amazon\.(com|ca|co\.uk|de|fr|it|es|jp|in|com\.au|com\.mx)\/.*\/dp\//,
+            /amazon\.(com|ca|co\.uk|de|fr|it|es|jp|in|com\.au|com\.mx)\/dp\//,
+            /amazon\.(com|ca|co\.uk|de|fr|it|es|jp|in|com\.au|com\.mx)\/.*\/gp\/product\//,
+            /ebay\.(com|ca|co\.uk|de|fr|it|es|com\.au)\/itm\//,
+            /walmart\.(com|ca)\/ip\//,
+            /bestbuy\.(com|ca)\/site\//,
+            /target\.com\/p\//,
+            /staples\.(com|ca)\/product_/
+        ];
+        
+        return productPagePatterns.some(pattern => pattern.test(url));
     }
 });
